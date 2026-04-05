@@ -55,7 +55,8 @@
 
       try {
         const res = await onboardTenant(payload);
-        result.textContent = res.message || "Saved";
+        result.textContent =
+  `${res.message} | Tenant ID: ${res.data.tenantId} | Plan: ${res.data.plan} | Free submissions: ${res.data.trialFreeSubmissions}`;
       } catch (err) {
         result.textContent = "Error saving onboarding data";
       }
