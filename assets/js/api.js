@@ -18,6 +18,16 @@ async function getTenant(tenantId) {
   const res = await fetch(`${API_BASE_URL}/api/tenants/${tenantId}`);
   return res.json();
 }
+async function submitDocument(payload) {
+  const res = await fetch(`${API_BASE_URL}/api/documents/submit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
 async function onboardTenant(payload) {
   const res = await fetch(`${API_BASE_URL}/api/tenants/onboard`, {
     method: "POST",
