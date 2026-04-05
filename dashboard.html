@@ -12,6 +12,8 @@
   <p id="usage">Usage: loading...</p>
   <p id="tenantDetails">Tenant details: loading...</p>
   <h2>Document Log</h2>
+  <p><button id="submitDocBtn">Submit Test Invoice</button></p>
+  <p id="submitResult"></p>
   <p>No documents yet.</p>
 
   <p><a href="index.html">Back to Home</a></p>
@@ -39,7 +41,27 @@
     }
   }
 
-  loadDashboard();
+  document.addEventListener("DOMContentLoaded", function () {
+    loadDashboard();
+
+    document.getElementById("submitDocBtn").addEventListener("click", async function () {
+      const tenantId = localStorage.getItem("tenantId") || "123";
+
+      try {
+        const res = await submitDocument({
+          tenantId,
+          documentType: "invoice",
+          documentNumber: "INV-" + Date.now()
+        });
+
+        document.getElementById("submitResult").textContent =
+          `${res.message} | Doc ID: ${res.data.id} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}`;
+      } catch (err) {
+        document.getElementById("submitResult").textContent =
+          "Error submitting document";
+      }
+    });
+  });
 </script>
 </body>
 </html>
