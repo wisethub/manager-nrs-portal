@@ -19,7 +19,7 @@
   <script src="assets/js/api.js"></script>
   <script>
     async function loadDashboard() {
-      const tenantId = "123";
+      const tenantId = localStorage.getItem("tenantId") || "123";
 
       const planRes = await getPlan(tenantId);
       const usageRes = await getUsage(tenantId);
