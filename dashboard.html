@@ -61,11 +61,14 @@
 
 if (documentsRes.success && documentsRes.data.length > 0) {
   documentsList.innerHTML = documentsRes.data.map(doc =>
-    `<li>
-      ${doc.documentNumber} | ${doc.documentType} | ${doc.transmissionStatus} | ${doc.paymentStatus}
-      <button onclick="markPaid('${doc.id}')">Mark as Paid</button>
-    </li>`
-  ).join("");
+  `<li>
+    ${doc.documentNumber} | ${doc.documentType} | ${doc.transmissionStatus} |
+    Payment: ${doc.paymentStatus === "PAID" ? "PAID" : "PENDING"}
+    ${doc.paymentStatus !== "PAID"
+      ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
+      : ""}
+  </li>`
+).join("");
 } else {
   documentsList.innerHTML = "<li>No documents yet.</li>";
 }
