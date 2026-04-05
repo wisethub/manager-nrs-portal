@@ -98,7 +98,7 @@ if (documentsRes.success && documentsRes.data.length > 0) {
   document.getElementById("submitResult").textContent =
     "Error submitting document";
 }
-      async function markPaid(documentId) {
+    window.markPaid = async function (documentId) {
   const tenantId = localStorage.getItem("tenantId") || "123";
 
   try {
@@ -121,7 +121,7 @@ if (documentsRes.success && documentsRes.data.length > 0) {
     document.getElementById("paymentResult").textContent =
       "Error updating payment status";
   }
-}
+};
     });
   });
 </script>
