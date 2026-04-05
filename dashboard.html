@@ -10,28 +10,36 @@
 
   <p id="plan">Plan: loading...</p>
   <p id="usage">Usage: loading...</p>
-
+  <p id="tenantDetails">Tenant details: loading...</p>
   <h2>Document Log</h2>
   <p>No documents yet.</p>
 
   <p><a href="index.html">Back to Home</a></p>
 
   <script src="assets/js/api.js"></script>
-  <script>
-    async function loadDashboard() {
-      const tenantId = localStorage.getItem("tenantId") || "123";
+<script>
+  async function loadDashboard() {
+    const tenantId = localStorage.getItem("tenantId") || "123";
 
-      const planRes = await getPlan(tenantId);
-      const usageRes = await getUsage(tenantId);
+    const planRes = await getPlan(tenantId);
+    const usageRes = await getUsage(tenantId);
+    const tenantRes = await getTenant(tenantId);
 
-      document.getElementById("plan").textContent =
-  `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
+    document.getElementById("plan").textContent =
+      `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
 
-      document.getElementById("usage").textContent =
-        `Usage: ${usageRes.data.used} used | ${usageRes.data.remaining} remaining out of ${usageRes.data.trialFreeSubmissions}`;
+    document.getElementById("usage").textContent =
+      `Usage: ${usageRes.data.used} used | ${usageRes.data.remaining} remaining out of ${usageRes.data.trialFreeSubmissions}`;
+
+    if (tenantRes.success) {
+      document.getElementById("tenantDetails").textContent =
+        `Business: ${tenantRes.data.business_name} | TIN: ${tenantRes.data.tin} | Email: ${tenantRes.data.registered_email}`;
+    } else {
+      document.getElementById("tenantDetails").textContent = "Tenant details not found";
     }
+  }
 
-    loadDashboard();
-  </script>
+  loadDashboard();
+</script>
 </body>
 </html>
