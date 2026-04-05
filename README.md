@@ -1,0 +1,2 @@
+# manager-nrs-portal
+frontend
