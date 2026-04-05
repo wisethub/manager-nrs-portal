@@ -15,6 +15,7 @@
   <p id="tenantDetails">Tenant details: loading...</p>
   <h2>Document Log</h2>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
+  <p><button id="submitCreditNoteBtn">Submit Test Credit Note</button></p>
   <p id="submitResult"></p>
   <p id="paymentResult"></p>
   <ul id="documentsList">
@@ -126,6 +127,31 @@ if (documentsRes.success && documentsRes.data.length > 0) {
   }
 };
     });
+    document.getElementById("submitCreditNoteBtn").addEventListener("click", async function () {
+  const tenantId = localStorage.getItem("tenantId") || "123";
+
+  try {
+    const res = await submitDocument({
+      tenantId,
+      documentType: "credit_note",
+      documentNumber: "CN-" + Date.now()
+    });
+
+    if (!res.success) {
+      document.getElementById("submitResult").textContent =
+        res.message || "Request failed";
+      return;
+    }
+
+    document.getElementById("submitResult").textContent =
+      `${res.message} | Doc ID: ${res.data.id} | Type: ${res.data.documentType} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}`;
+
+    await loadDashboard();
+  } catch (err) {
+    document.getElementById("submitResult").textContent =
+      "Error submitting document";
+  }
+});
   });
 </script>
 </body>
