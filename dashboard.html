@@ -14,7 +14,9 @@
   <h2>Document Log</h2>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
   <p id="submitResult"></p>
-  <p>No documents yet.</p>
+  <ul id="documentsList">
+  <li>Loading documents...</li>
+  </ul>
 
   <p><a href="index.html">Back to Home</a></p>
 
@@ -26,6 +28,7 @@
     const planRes = await getPlan(tenantId);
     const usageRes = await getUsage(tenantId);
     const tenantRes = await getTenant(tenantId);
+    const documentsRes = await getDocuments(tenantId);
 
     document.getElementById("plan").textContent =
       `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
@@ -39,6 +42,15 @@
     } else {
       document.getElementById("tenantDetails").textContent = "Tenant details not found";
     }
+    const documentsList = document.getElementById("documentsList");
+
+if (documentsRes.success && documentsRes.data.length > 0) {
+  documentsList.innerHTML = documentsRes.data.map(doc =>
+    `<li>${doc.documentNumber} | ${doc.documentType} | ${doc.transmissionStatus} | ${doc.paymentStatus}</li>`
+  ).join("");
+} else {
+  documentsList.innerHTML = "<li>No documents yet.</li>";
+}
   }
 
   document.addEventListener("DOMContentLoaded", function () {
