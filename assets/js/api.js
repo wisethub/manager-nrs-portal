@@ -18,6 +18,10 @@ async function getTenant(tenantId) {
   const res = await fetch(`${API_BASE_URL}/api/tenants/${tenantId}`);
   return res.json();
 }
+async function getDocuments(tenantId) {
+  const res = await fetch(`${API_BASE_URL}/api/documents/${tenantId}`);
+  return res.json();
+}
 async function submitDocument(payload) {
   const res = await fetch(`${API_BASE_URL}/api/documents/submit`, {
     method: "POST",
