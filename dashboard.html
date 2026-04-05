@@ -10,6 +10,7 @@
 
   <p id="plan">Plan: loading...</p>
   <p id="usage">Usage: loading...</p>
+  <p id="trialStatus">Trial status: loading...</p>
   <p id="tenantDetails">Tenant details: loading...</p>
   <h2>Document Log</h2>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
@@ -35,6 +36,13 @@
 
     document.getElementById("usage").textContent =
       `Usage: ${usageRes.data.used} used | ${usageRes.data.remaining} remaining out of ${usageRes.data.trialFreeSubmissions}`;
+    if (usageRes.data.remaining <= 0) {
+  document.getElementById("trialStatus").textContent =
+    "Trial status: Expired - please upgrade your plan.";
+} else {
+  document.getElementById("trialStatus").textContent =
+    `Trial status: Active - ${usageRes.data.remaining} free submission(s) remaining.`;
+}
 
     if (tenantRes.success) {
       document.getElementById("tenantDetails").textContent =
