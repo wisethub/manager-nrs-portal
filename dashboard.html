@@ -35,7 +35,7 @@
     const documentsRes = await getDocuments(tenantId);
 
     document.getElementById("plan").textContent =
-      `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
+  `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Subscription status: ${planRes.data.subscriptionStatus} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
 
     document.getElementById("usage").textContent =
       `Usage: ${usageRes.data.used} used | ${usageRes.data.remaining} remaining out of ${usageRes.data.trialFreeSubmissions}`;
