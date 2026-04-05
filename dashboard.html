@@ -11,6 +11,7 @@
   <p id="plan">Plan: loading...</p>
   <p id="usage">Usage: loading...</p>
   <p id="trialStatus">Trial status: loading...</p>
+  <p id="upgradeMessage"></p>
   <p id="tenantDetails">Tenant details: loading...</p>
   <h2>Document Log</h2>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
@@ -39,9 +40,14 @@
     if (usageRes.data.remaining <= 0) {
   document.getElementById("trialStatus").textContent =
     "Trial status: Expired - please upgrade your plan.";
+
+  document.getElementById("upgradeMessage").textContent =
+    "Upgrade options: Monthly plan NGN 50000 for up to 200 invoices/credit notes, or contact management for Enterprise.";
 } else {
   document.getElementById("trialStatus").textContent =
     `Trial status: Active - ${usageRes.data.remaining} free submission(s) remaining.`;
+
+  document.getElementById("upgradeMessage").textContent = "";
 }
 
     if (tenantRes.success) {
