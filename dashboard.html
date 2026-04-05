@@ -60,7 +60,7 @@
     const documentsList = document.getElementById("documentsList");
 
 if (documentsRes.success && documentsRes.data.length > 0) {
-  documentsList.innerHTML = documentsRes.data.map(doc =>
+  documentsList.innerHTML = [...documentsRes.data].reverse().map(doc =>
   `<li>
     ${doc.documentNumber} | ${doc.documentType} | ${doc.transmissionStatus} |
     Payment: ${doc.paymentStatus === "PAID" ? "PAID" : "PENDING"}
