@@ -16,6 +16,7 @@
   <h2>Document Log</h2>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
   <p id="submitResult"></p>
+  <p id="paymentResult"></p>
   <ul id="documentsList">
   <li>Loading documents...</li>
   </ul>
@@ -60,7 +61,10 @@
 
 if (documentsRes.success && documentsRes.data.length > 0) {
   documentsList.innerHTML = documentsRes.data.map(doc =>
-    `<li>${doc.documentNumber} | ${doc.documentType} | ${doc.transmissionStatus} | ${doc.paymentStatus}</li>`
+    `<li>
+      ${doc.documentNumber} | ${doc.documentType} | ${doc.transmissionStatus} | ${doc.paymentStatus}
+      <button onclick="markPaid('${doc.id}')">Mark as Paid</button>
+    </li>`
   ).join("");
 } else {
   documentsList.innerHTML = "<li>No documents yet.</li>";
@@ -93,6 +97,30 @@ if (documentsRes.success && documentsRes.data.length > 0) {
 } catch (err) {
   document.getElementById("submitResult").textContent =
     "Error submitting document";
+}
+      async function markPaid(documentId) {
+  const tenantId = localStorage.getItem("tenantId") || "123";
+
+  try {
+    const res = await markDocumentPaid({
+      tenantId,
+      documentId
+    });
+
+    if (!res.success) {
+      document.getElementById("paymentResult").textContent =
+        res.message || "Failed to mark document as paid";
+      return;
+    }
+
+    document.getElementById("paymentResult").textContent =
+      `${res.message} | Doc ID: ${res.data.id} | Payment: ${res.data.paymentStatus}`;
+
+    await loadDashboard();
+  } catch (err) {
+    document.getElementById("paymentResult").textContent =
+      "Error updating payment status";
+  }
 }
     });
   });
