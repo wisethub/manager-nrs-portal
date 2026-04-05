@@ -14,7 +14,10 @@ async function getPlan(tenantId) {
   const res = await fetch(`${API_BASE_URL}/api/billing/plan/${tenantId}`);
   return res.json();
 }
-
+async function getTenant(tenantId) {
+  const res = await fetch(`${API_BASE_URL}/api/tenants/${tenantId}`);
+  return res.json();
+}
 async function onboardTenant(payload) {
   const res = await fetch(`${API_BASE_URL}/api/tenants/onboard`, {
     method: "POST",
