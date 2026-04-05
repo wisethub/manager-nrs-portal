@@ -8,23 +8,58 @@
 <body>
   <h1>Business Onboarding</h1>
 
-  <form>
-    <p><input type="text" placeholder="Business Name" /></p>
-    <p><input type="text" placeholder="TIN" /></p>
-    <p><input type="email" placeholder="Registered Email" /></p>
-    <p><input type="text" placeholder="Base URL" /></p>
-    <p><input type="text" placeholder="Report Base URL" /></p>
-    <p><input type="text" placeholder="Entity ID" /></p>
-    <p><input type="text" placeholder="Business ID" /></p>
-    <p><input type="text" placeholder="API Key" /></p>
-    <p><input type="text" placeholder="Client Secret" /></p>
-    <p><input type="text" placeholder="IRN Template" /></p>
-    <p><input type="text" placeholder="Cryptographic Key" /></p>
-    <p><input type="text" placeholder="Public Key" /></p>
-    <p><input type="text" placeholder="Service ID" /></p>
+  <form id="onboardingForm">
+    <p><input type="text" id="business_name" placeholder="Business Name" required /></p>
+    <p><input type="text" id="tin" placeholder="TIN" required /></p>
+    <p><input type="email" id="registered_email" placeholder="Registered Email" required /></p>
+    <p><input type="text" id="base_url" placeholder="Base URL" /></p>
+    <p><input type="text" id="report_base_url" placeholder="Report Base URL" /></p>
+    <p><input type="text" id="entity_id" placeholder="Entity ID" /></p>
+    <p><input type="text" id="business_id" placeholder="Business ID" /></p>
+    <p><input type="text" id="api_key" placeholder="API Key" /></p>
+    <p><input type="text" id="client_secret" placeholder="Client Secret" /></p>
+    <p><input type="text" id="irn_template" placeholder="IRN Template" /></p>
+    <p><input type="text" id="cryptographic_key" placeholder="Cryptographic Key" /></p>
+    <p><input type="text" id="public_key" placeholder="Public Key" /></p>
+    <p><input type="text" id="service_id" placeholder="Service ID" /></p>
     <p><button type="submit">Save</button></p>
   </form>
 
+  <p id="result"></p>
+
   <p><a href="index.html">Back to Home</a></p>
+
+  <script src="assets/js/api.js"></script>
+  <script>
+    const form = document.getElementById("onboardingForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const payload = {
+        business_name: document.getElementById("business_name").value,
+        tin: document.getElementById("tin").value,
+        registered_email: document.getElementById("registered_email").value,
+        base_url: document.getElementById("base_url").value,
+        report_base_url: document.getElementById("report_base_url").value,
+        entity_id: document.getElementById("entity_id").value,
+        business_id: document.getElementById("business_id").value,
+        api_key: document.getElementById("api_key").value,
+        client_secret: document.getElementById("client_secret").value,
+        irn_template: document.getElementById("irn_template").value,
+        cryptographic_key: document.getElementById("cryptographic_key").value,
+        public_key: document.getElementById("public_key").value,
+        service_id: document.getElementById("service_id").value
+      };
+
+      try {
+        const res = await onboardTenant(payload);
+        result.textContent = res.message || "Saved";
+      } catch (err) {
+        result.textContent = "Error saving onboarding data";
+      }
+    });
+  </script>
 </body>
 </html>
