@@ -60,19 +60,26 @@ if (documentsRes.success && documentsRes.data.length > 0) {
       const tenantId = localStorage.getItem("tenantId") || "123";
 
       try {
-        const res = await submitDocument({
-          tenantId,
-          documentType: "invoice",
-          documentNumber: "INV-" + Date.now()
-        });
+  const res = await submitDocument({
+    tenantId,
+    documentType: "invoice",
+    documentNumber: "INV-" + Date.now()
+  });
 
-        document.getElementById("submitResult").textContent =
-          `${res.message} | Doc ID: ${res.data.id} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}`;
-        await loadDashboard();
-      } catch (err) {
-        document.getElementById("submitResult").textContent =
-          "Error submitting document";
-      }
+  if (!res.success) {
+    document.getElementById("submitResult").textContent =
+      res.message || "Request failed";
+    return;
+  }
+
+  document.getElementById("submitResult").textContent =
+    `${res.message} | Doc ID: ${res.data.id} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}`;
+
+  await loadDashboard();
+} catch (err) {
+  document.getElementById("submitResult").textContent =
+    "Error submitting document";
+}
     });
   });
 </script>
