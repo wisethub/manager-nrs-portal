@@ -68,6 +68,7 @@ if (documentsRes.success && documentsRes.data.length > 0) {
 
         document.getElementById("submitResult").textContent =
           `${res.message} | Doc ID: ${res.data.id} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}`;
+        await loadDashboard();
       } catch (err) {
         document.getElementById("submitResult").textContent =
           "Error submitting document";
