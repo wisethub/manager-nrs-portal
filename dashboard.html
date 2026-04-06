@@ -16,6 +16,8 @@
   <p id="tenantDetails">Tenant details: loading...</p>
   <h2>Document Log</h2>
   <p id="documentCount">Total documents: loading...</p>
+  <p id="paidCount">Paid documents: loading...</p>
+  <p id="pendingCount">Pending documents: loading...</p>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
   <p><button id="submitCreditNoteBtn">Submit Test Credit Note</button></p>
   <p id="submitResult"></p>
@@ -64,9 +66,15 @@ document.getElementById("enterpriseMessage").textContent =
     }
     const documentsList = document.getElementById("documentsList");
 const documentCount = document.getElementById("documentCount");
-
+const paidCount = document.getElementById("paidCount");
+const pendingCount = document.getElementById("pendingCount");
 if (documentsRes.success && documentsRes.data.length > 0) {
+  const paidTotal = documentsRes.data.filter(doc => doc.paymentStatus === "PAID").length;
+  const pendingTotal = documentsRes.data.filter(doc => doc.paymentStatus !== "PAID").length;
+
   documentCount.textContent = `Total documents: ${documentsRes.data.length}`;
+  paidCount.textContent = `Paid documents: ${paidTotal}`;
+  pendingCount.textContent = `Pending documents: ${pendingTotal}`;
 
   documentsList.innerHTML = documentsRes.data.map(doc =>
     `<li>
@@ -79,6 +87,8 @@ if (documentsRes.success && documentsRes.data.length > 0) {
   ).join("");
 } else {
   documentCount.textContent = "Total documents: 0";
+  paidCount.textContent = "Paid documents: 0";
+  pendingCount.textContent = "Pending documents: 0";
   documentsList.innerHTML = "<li>No documents yet.</li>";
 }
   }
