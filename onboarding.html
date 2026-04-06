@@ -8,7 +8,7 @@
 <body>
   <h1>Business Onboarding</h1>
 
-  <form id="onboardingForm" onsubmit="runOnboardingSave(event)">
+  <form id="onboardingForm" onsubmit="runOnboardingSave(event); return false;">
     <p><input type="text" id="business_name" placeholder="Business Name" required /></p>
     <p><input type="text" id="tin" placeholder="TIN" required /></p>
     <p><input type="email" id="registered_email" placeholder="Registered Email" required /></p>
