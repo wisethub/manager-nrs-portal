@@ -8,7 +8,7 @@
 <body>
   <h1>Business Onboarding</h1>
 
-  <form id="onboardingForm" onsubmit="runOnboardingSave(event); return false;">
+  <form id="onboardingForm">
     <p><input type="text" id="business_name" placeholder="Business Name" required /></p>
     <p><input type="text" id="tin" placeholder="TIN" required /></p>
     <p><input type="email" id="registered_email" placeholder="Registered Email" required /></p>
@@ -22,7 +22,7 @@
     <p><input type="text" id="cryptographic_key" placeholder="Cryptographic Key" /></p>
     <p><input type="text" id="public_key" placeholder="Public Key" /></p>
     <p><input type="text" id="service_id" placeholder="Service ID" /></p>
-    <p><button type="submit">Save</button></p>
+    <p><button type="button" onclick="runOnboardingSave(event)">Save</button></p>
     <p><button type="button" id="testNrsBtn" onclick="runNrsTest()">Test NRS Connection</button></p>
   </form>
 
