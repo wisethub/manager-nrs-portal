@@ -23,7 +23,7 @@
     <p><input type="text" id="public_key" placeholder="Public Key" /></p>
     <p><input type="text" id="service_id" placeholder="Service ID" /></p>
     <p><button type="submit">Save</button></p>
-    <p><button type="button" id="testNrsBtn" onclick="document.getElementById('nrsTestResult').textContent='Inline click works'">Test NRS Connection</button></p>
+    <p><button type="button" id="testNrsBtn" onclick="runNrsTest()">Test NRS Connection</button></p>
   </form>
 
   <p id="result"></p>
@@ -42,24 +42,8 @@ if (existingTenantId) {
     const form = document.getElementById("onboardingForm");
     const result = document.getElementById("result");
     const nrsTestResult = document.getElementById("nrsTestResult");
-    const testNrsBtn = document.getElementById("testNrsBtn");
-    testNrsBtn.addEventListener("click", async function () {
-    nrsTestResult.textContent = "Test button clicked";
-    const payload = {
-    tin,
-    registered_email: registeredEmail,
-    base_url: document.getElementById("base_url").value,
-    report_base_url: document.getElementById("report_base_url").value,
-    entity_id: document.getElementById("entity_id").value,
-    business_id: document.getElementById("business_id").value,
-    api_key: apiKey,
-    client_secret: clientSecret,
-    irn_template: irn_template,
-    cryptographic_key: cryptographicKey,
-    public_key: publicKey,
-    service_id: serviceId
-  };
-       const tin = document.getElementById("tin").value.trim();
+  window.runNrsTest = async function () {
+  const tin = document.getElementById("tin").value.trim();
   const registeredEmail = document.getElementById("registered_email").value.trim();
   const apiKey = document.getElementById("api_key").value.trim();
   const clientSecret = document.getElementById("client_secret").value.trim();
@@ -80,21 +64,32 @@ if (existingTenantId) {
       "Please fill TIN, Registered Email, API Key, Client Secret, Cryptographic Key, Public Key, and Service ID before testing.";
     return;
   }
-  nrsTestResult.textContent =
-    "Please fill TIN, Registered Email, API Key, Client Secret, Cryptographic Key, Public Key, and Service ID before testing.";
-  return;
-}
+
+  const payload = {
+    tin,
+    registered_email: registeredEmail,
+    base_url: document.getElementById("base_url").value,
+    report_base_url: document.getElementById("report_base_url").value,
+    entity_id: document.getElementById("entity_id").value,
+    business_id: document.getElementById("business_id").value,
+    api_key: apiKey,
+    client_secret: clientSecret,
+    irn_template: document.getElementById("irn_template").value,
+    cryptographic_key: cryptographicKey,
+    public_key: publicKey,
+    service_id: serviceId
+  };
 
   try {
     const res = await testNrsConnection(payload);
 
     nrsTestResult.textContent =
-  `${res.message} | API Key present: ${res.data.api_key_present} | Client Secret present: ${res.data.client_secret_present} | Crypto Key present: ${res.data.cryptographic_key_present} | Public Key present: ${res.data.public_key_present} | Service ID: ${res.data.service_id || "missing"}`;
+      `${res.message} | API Key present: ${res.data.api_key_present} | Client Secret present: ${res.data.client_secret_present} | Crypto Key present: ${res.data.cryptographic_key_present} | Public Key present: ${res.data.public_key_present} | Service ID: ${res.data.service_id || "missing"}`;
   } catch (err) {
     nrsTestResult.textContent = "Error testing NRS connection";
   }
-});
-    form.addEventListener("submit", async function (e) {
+};
+        form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const payload = {
