@@ -61,6 +61,7 @@ localStorage.setItem("tenantId", res.data.tenantId);
 
 result.textContent =
   `${res.message} | Tenant ID: ${res.data.tenantId} | Plan: ${res.data.plan} | Free submissions: ${res.data.trialFreeSubmissions}`;
+form.reset();
         setTimeout(() => {
   window.location.href = "dashboard.html";
 }, 1500);
