@@ -13,7 +13,9 @@
   <p id="trialStatus">Trial status: loading...</p>
   <p id="upgradeMessage"></p>
   <p id="enterpriseMessage"></p>
-  <p id="tenantDetails">Tenant details: loading...</p>
+  <p id="tenantBusiness">Business: loading...</p>
+  <p id="tenantTin">TIN: loading...</p>
+  <p id="tenantEmail">Email: loading...</p>
   <h2>Document Log</h2>
   <p id="documentCount">Total documents: loading...</p>
   <p id="paidCount">Paid documents: loading...</p>
@@ -81,11 +83,17 @@ document.getElementById("enterpriseMessage").textContent =
 }
 
     if (tenantRes.success) {
-      document.getElementById("tenantDetails").textContent =
-        `Business: ${tenantRes.data.business_name} | TIN: ${tenantRes.data.tin} | Email: ${tenantRes.data.registered_email}`;
-    } else {
-      document.getElementById("tenantDetails").textContent = "Tenant details not found";
-    }
+  document.getElementById("tenantBusiness").textContent =
+    `Business: ${tenantRes.data.business_name}`;
+  document.getElementById("tenantTin").textContent =
+    `TIN: ${tenantRes.data.tin}`;
+  document.getElementById("tenantEmail").textContent =
+    `Email: ${tenantRes.data.registered_email}`;
+} else {
+  document.getElementById("tenantBusiness").textContent = "Business: not found";
+  document.getElementById("tenantTin").textContent = "TIN: not found";
+  document.getElementById("tenantEmail").textContent = "Email: not found";
+}
     const documentsList = document.getElementById("documentsList");
     const statusFilter = document.getElementById("statusFilter");
     const typeFilter = document.getElementById("typeFilter");
