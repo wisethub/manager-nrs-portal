@@ -50,7 +50,7 @@
 
   <script src="assets/js/api.js"></script>
 <script>
-  async function fetchWithTimeout(promiseFactory, timeoutMs = 15000) {
+  async function fetchWithTimeout(promiseFactory, timeoutMs = 60000) {
   return Promise.race([
     promiseFactory(),
     new Promise((_, reject) =>
@@ -158,10 +158,12 @@
           : `<li>No documents submitted yet. Trial has expired. Upgrade to the monthly plan or contact management for Enterprise.</li>`;
     }
   } catch (err) {
-    document.getElementById("plan").textContent = "Plan: failed to load";
-    document.getElementById("usage").textContent = "Usage: failed to load";
-    document.getElementById("trialStatus").textContent = `Dashboard load error: ${err.message}`;
-  }
+  document.getElementById("plan").textContent = "Plan: failed to load";
+  document.getElementById("usage").textContent = "Usage: failed to load";
+  document.getElementById("trialStatus").textContent = `Dashboard load error: ${err.message}`;
+  document.getElementById("enterpriseMessage").textContent = "";
+  document.getElementById("subscriptionAction").textContent = "";
+}
 }
 
   document.addEventListener("DOMContentLoaded", function () {
