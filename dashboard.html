@@ -48,7 +48,12 @@
   <script src="assets/js/api.js"></script>
 <script>
   async function loadDashboard() {
-    const tenantId = localStorage.getItem("tenantId") || "123";
+    const tenantId = localStorage.getItem("tenantId");
+
+if (!tenantId) {
+  window.location.href = "onboarding.html";
+  return;
+}
 
     const planRes = await getPlan(tenantId);
     const usageRes = await getUsage(tenantId);
@@ -139,7 +144,12 @@ documentsList.innerHTML = filteredDocuments.map(doc =>
   window.location.href = "onboarding.html";
 });
     document.getElementById("submitDocBtn").addEventListener("click", async function () {
-      const tenantId = localStorage.getItem("tenantId") || "123";
+      const tenantId = localStorage.getItem("tenantId");
+
+if (!tenantId) {
+  window.location.href = "onboarding.html";
+  return;
+}
 
       try {
   const res = await submitDocument({
@@ -163,7 +173,12 @@ documentsList.innerHTML = filteredDocuments.map(doc =>
     "Error submitting document";
 }
     window.markPaid = async function (documentId) {
-  const tenantId = localStorage.getItem("tenantId") || "123";
+  const tenantId = localStorage.getItem("tenantId");
+
+if (!tenantId) {
+  window.location.href = "onboarding.html";
+  return;
+}
 
   try {
     const res = await markDocumentPaid({
@@ -188,7 +203,12 @@ documentsList.innerHTML = filteredDocuments.map(doc =>
 };
     });
     document.getElementById("submitCreditNoteBtn").addEventListener("click", async function () {
-  const tenantId = localStorage.getItem("tenantId") || "123";
+  const tenantId = localStorage.getItem("tenantId");
+
+if (!tenantId) {
+  window.location.href = "onboarding.html";
+  return;
+}
 
   try {
     const res = await submitDocument({
