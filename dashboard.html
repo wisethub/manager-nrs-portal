@@ -135,7 +135,9 @@ documentsList.innerHTML = filteredDocuments.map(doc =>
   paidCount.textContent = "Paid documents: 0";
   pendingCount.textContent = "Pending documents: 0";
   documentsList.innerHTML =
-  `<li>No documents submitted yet. Trial is active with ${usageRes.data.remaining} free submission(s) remaining. Submit a test invoice or credit note to begin.</li>`;
+  usageRes.data.remaining > 0
+    ? `<li>No documents submitted yet. Trial is active with ${usageRes.data.remaining} free submission(s) remaining. Submit a test invoice or credit note to begin.</li>`
+    : `<li>No documents submitted yet. Trial has expired. Upgrade to the monthly plan or contact management for Enterprise.</li>`;
 }
   }
 
