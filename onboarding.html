@@ -44,6 +44,7 @@ if (existingTenantId) {
     const nrsTestResult = document.getElementById("nrsTestResult");
     const testNrsBtn = document.getElementById("testNrsBtn");
     testNrsBtn.addEventListener("click", async function () {
+    nrsTestResult.textContent = "Test button clicked";
     const payload = {
     tin,
     registered_email: registeredEmail,
