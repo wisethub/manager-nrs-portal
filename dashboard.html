@@ -158,9 +158,10 @@
           : `<li>No documents submitted yet. Trial has expired. Upgrade to the monthly plan or contact management for Enterprise.</li>`;
     }
   } catch (err) {
-  document.getElementById("plan").textContent = "Plan: failed to load";
-  document.getElementById("usage").textContent = "Usage: failed to load";
-  document.getElementById("trialStatus").textContent = `Dashboard load error: ${err.message}`;
+  document.getElementById("plan").textContent = "Plan: waiting for backend...";
+  document.getElementById("usage").textContent = "Usage: waiting for backend...";
+  document.getElementById("trialStatus").textContent =
+    "Dashboard is waiting for the Render backend to wake up. Refresh again in a few seconds.";
   document.getElementById("enterpriseMessage").textContent = "";
   document.getElementById("subscriptionAction").textContent = "";
 }
