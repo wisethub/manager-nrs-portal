@@ -15,6 +15,7 @@
   <p id="enterpriseMessage"></p>
   <p id="tenantDetails">Tenant details: loading...</p>
   <h2>Document Log</h2>
+  <p id="documentCount">Total documents: loading...</p>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
   <p><button id="submitCreditNoteBtn">Submit Test Credit Note</button></p>
   <p id="submitResult"></p>
@@ -62,18 +63,22 @@ document.getElementById("enterpriseMessage").textContent =
       document.getElementById("tenantDetails").textContent = "Tenant details not found";
     }
     const documentsList = document.getElementById("documentsList");
+const documentCount = document.getElementById("documentCount");
 
 if (documentsRes.success && documentsRes.data.length > 0) {
+  documentCount.textContent = `Total documents: ${documentsRes.data.length}`;
+
   documentsList.innerHTML = documentsRes.data.map(doc =>
-  `<li>
-    ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
-    Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
-    ${doc.paymentStatus !== "PAID"
-      ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
-      : ""}
-  </li>`
-).join("");
+    `<li>
+      ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
+      Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
+      ${doc.paymentStatus !== "PAID"
+        ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
+        : ""}
+    </li>`
+  ).join("");
 } else {
+  documentCount.textContent = "Total documents: 0";
   documentsList.innerHTML = "<li>No documents yet.</li>";
 }
   }
