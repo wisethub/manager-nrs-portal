@@ -35,6 +35,15 @@
 
   <script src="assets/js/api.js"></script>
   <script>
+    const existingTenantId = localStorage.getItem("tenantId");
+
+if (existingTenantId) {
+  window.location.href = "dashboard.html";
+}
+
+const form = document.getElementById("onboardingForm");
+const result = document.getElementById("result");
+const nrsTestResult = document.getElementById("nrsTestResult");
     const form = document.getElementById("onboardingForm");
     const result = document.getElementById("result");
     const nrsTestResult = document.getElementById("nrsTestResult");
