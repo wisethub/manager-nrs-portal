@@ -8,7 +8,7 @@
 <body>
   <h1>Business Onboarding</h1>
 
-  <form id="onboardingForm">
+  <form id="onboardingForm" onsubmit="return false;">
     <p><input type="text" id="business_name" placeholder="Business Name" required /></p>
     <p><input type="text" id="tin" placeholder="TIN" required /></p>
     <p><input type="email" id="registered_email" placeholder="Registered Email" required /></p>
@@ -23,8 +23,8 @@
     <p><input type="text" id="public_key" placeholder="Public Key" /></p>
     <p><input type="text" id="service_id" placeholder="Service ID" /></p>
 
-    <p><button type="button" onclick="runOnboardingSave()">Save</button></p>
-    <p><button type="button" onclick="runNrsTest()">Test NRS Connection</button></p>
+    <p><button type="button" id="saveBtn">Save</button></p>
+    <p><button type="button" id="testNrsBtn">Test NRS Connection</button></p>
   </form>
 
   <p id="result"></p>
@@ -36,37 +36,47 @@
   <script src="assets/js/api.js"></script>
   <script>
     const existingTenantId = localStorage.getItem("tenantId");
+    if (existingTenantId) {
+      window.location.href = "dashboard.html";
+    }
 
-if (existingTenantId) {
-  window.location.href = "dashboard.html";
-}
-
-const form = document.getElementById("onboardingForm");
-const result = document.getElementById("result");
-const nrsTestResult = document.getElementById("nrsTestResult");
     const form = document.getElementById("onboardingForm");
     const result = document.getElementById("result");
     const nrsTestResult = document.getElementById("nrsTestResult");
+    const saveBtn = document.getElementById("saveBtn");
+    const testNrsBtn = document.getElementById("testNrsBtn");
 
     let nrsTestPassed = false;
 
-    window.runNrsTest = async function () {
-      const tin = document.getElementById("tin").value.trim();
-      const registeredEmail = document.getElementById("registered_email").value.trim();
-      const apiKey = document.getElementById("api_key").value.trim();
-      const clientSecret = document.getElementById("client_secret").value.trim();
-      const cryptographicKey = document.getElementById("cryptographic_key").value.trim();
-      const publicKey = document.getElementById("public_key").value.trim();
-      const serviceId = document.getElementById("service_id").value.trim();
+    function getPayload() {
+      return {
+        business_name: document.getElementById("business_name").value.trim(),
+        tin: document.getElementById("tin").value.trim(),
+        registered_email: document.getElementById("registered_email").value.trim(),
+        base_url: document.getElementById("base_url").value.trim(),
+        report_base_url: document.getElementById("report_base_url").value.trim(),
+        entity_id: document.getElementById("entity_id").value.trim(),
+        business_id: document.getElementById("business_id").value.trim(),
+        api_key: document.getElementById("api_key").value.trim(),
+        client_secret: document.getElementById("client_secret").value.trim(),
+        irn_template: document.getElementById("irn_template").value.trim(),
+        cryptographic_key: document.getElementById("cryptographic_key").value.trim(),
+        public_key: document.getElementById("public_key").value.trim(),
+        service_id: document.getElementById("service_id").value.trim()
+      };
+    }
+
+    testNrsBtn.onclick = async function () {
+      const payload = getPayload();
 
       if (
-        !tin ||
-        !registeredEmail ||
-        !apiKey ||
-        !clientSecret ||
-        !cryptographicKey ||
-        !publicKey ||
-        !serviceId
+        !payload.tin ||
+        !payload.registered_email ||
+        !payload.api_key ||
+        !payload.client_secret ||
+        !payload.cryptographic_key ||
+        !payload.public_key ||
+        !payload.service_id
       ) {
         nrsTestPassed = false;
         nrsTestResult.textContent =
@@ -74,23 +84,21 @@ const nrsTestResult = document.getElementById("nrsTestResult");
         return;
       }
 
-      const payload = {
-        tin,
-        registered_email: registeredEmail,
-        base_url: document.getElementById("base_url").value.trim(),
-        report_base_url: document.getElementById("report_base_url").value.trim(),
-        entity_id: document.getElementById("entity_id").value.trim(),
-        business_id: document.getElementById("business_id").value.trim(),
-        api_key: apiKey,
-        client_secret: clientSecret,
-        irn_template: document.getElementById("irn_template").value.trim(),
-        cryptographic_key: cryptographicKey,
-        public_key: publicKey,
-        service_id: serviceId
-      };
-
       try {
-        const res = await testNrsConnection(payload);
+        const res = await testNrsConnection({
+          tin: payload.tin,
+          registered_email: payload.registered_email,
+          base_url: payload.base_url,
+          report_base_url: payload.report_base_url,
+          entity_id: payload.entity_id,
+          business_id: payload.business_id,
+          api_key: payload.api_key,
+          client_secret: payload.client_secret,
+          irn_template: payload.irn_template,
+          cryptographic_key: payload.cryptographic_key,
+          public_key: payload.public_key,
+          service_id: payload.service_id
+        });
 
         if (!res.success) {
           nrsTestPassed = false;
@@ -107,27 +115,13 @@ const nrsTestResult = document.getElementById("nrsTestResult");
       }
     };
 
-    window.runOnboardingSave = async function () {
+    saveBtn.onclick = async function () {
       if (!nrsTestPassed) {
         result.textContent = "Please test NRS connection successfully before saving.";
         return;
       }
 
-      const payload = {
-        business_name: document.getElementById("business_name").value.trim(),
-        tin: document.getElementById("tin").value.trim(),
-        registered_email: document.getElementById("registered_email").value.trim(),
-        base_url: document.getElementById("base_url").value.trim(),
-        report_base_url: document.getElementById("report_base_url").value.trim(),
-        entity_id: document.getElementById("entity_id").value.trim(),
-        business_id: document.getElementById("business_id").value.trim(),
-        api_key: document.getElementById("api_key").value.trim(),
-        client_secret: document.getElementById("client_secret").value.trim(),
-        irn_template: document.getElementById("irn_template").value.trim(),
-        cryptographic_key: document.getElementById("cryptographic_key").value.trim(),
-        public_key: document.getElementById("public_key").value.trim(),
-        service_id: document.getElementById("service_id").value.trim()
-      };
+      const payload = getPayload();
 
       try {
         const res = await onboardTenant(payload);
@@ -138,7 +132,6 @@ const nrsTestResult = document.getElementById("nrsTestResult");
         }
 
         localStorage.setItem("tenantId", res.data.tenantId);
-
         result.textContent =
           `${res.message} | Tenant ID: ${res.data.tenantId} | Plan: ${res.data.plan} | Free submissions: ${res.data.trialFreeSubmissions}`;
 
@@ -153,6 +146,5 @@ const nrsTestResult = document.getElementById("nrsTestResult");
       }
     };
   </script>
-  <!-- pages refresh 164d -->
 </body>
 </html>
