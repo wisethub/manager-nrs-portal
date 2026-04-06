@@ -8,7 +8,7 @@
 <body>
   <h1>Business Onboarding</h1>
 
-  <form id="onboardingForm">
+  <form id="onboardingForm" onsubmit="runOnboardingSave(event)">
     <p><input type="text" id="business_name" placeholder="Business Name" required /></p>
     <p><input type="text" id="tin" placeholder="TIN" required /></p>
     <p><input type="email" id="registered_email" placeholder="Registered Email" required /></p>
@@ -93,44 +93,47 @@ if (existingTenantId) {
   nrsTestResult.textContent = "Error testing NRS connection";
 }
 };
-        form.addEventListener("submit", async function (e) {
-      e.preventDefault();
-          if (!nrsTestPassed) {
-  result.textContent = "Please test NRS connection successfully before saving.";
-  return;
-}
+       window.runOnboardingSave = async function (e) {
+  e.preventDefault();
 
-      const payload = {
-        business_name: document.getElementById("business_name").value,
-        tin: document.getElementById("tin").value,
-        registered_email: document.getElementById("registered_email").value,
-        base_url: document.getElementById("base_url").value,
-        report_base_url: document.getElementById("report_base_url").value,
-        entity_id: document.getElementById("entity_id").value,
-        business_id: document.getElementById("business_id").value,
-        api_key: document.getElementById("api_key").value,
-        client_secret: document.getElementById("client_secret").value,
-        irn_template: document.getElementById("irn_template").value,
-        cryptographic_key: document.getElementById("cryptographic_key").value,
-        public_key: document.getElementById("public_key").value,
-        service_id: document.getElementById("service_id").value
-      };
+  if (!nrsTestPassed) {
+    result.textContent = "Please test NRS connection successfully before saving.";
+    return;
+  }
 
-      try {
-        const res = await onboardTenant(payload);
+  const payload = {
+    business_name: document.getElementById("business_name").value,
+    tin: document.getElementById("tin").value,
+    registered_email: document.getElementById("registered_email").value,
+    base_url: document.getElementById("base_url").value,
+    report_base_url: document.getElementById("report_base_url").value,
+    entity_id: document.getElementById("entity_id").value,
+    business_id: document.getElementById("business_id").value,
+    api_key: document.getElementById("api_key").value,
+    client_secret: document.getElementById("client_secret").value,
+    irn_template: document.getElementById("irn_template").value,
+    cryptographic_key: document.getElementById("cryptographic_key").value,
+    public_key: document.getElementById("public_key").value,
+    service_id: document.getElementById("service_id").value
+  };
 
-localStorage.setItem("tenantId", res.data.tenantId);
+  try {
+    const res = await onboardTenant(payload);
 
-result.textContent =
-  `${res.message} | Tenant ID: ${res.data.tenantId} | Plan: ${res.data.plan} | Free submissions: ${res.data.trialFreeSubmissions}`;
-form.reset();
-        setTimeout(() => {
-  window.location.href = "dashboard.html";
-}, 1500);
-      } catch (err) {
-        result.textContent = "Error saving onboarding data";
-      }
-    });
+    localStorage.setItem("tenantId", res.data.tenantId);
+
+    result.textContent =
+      `${res.message} | Tenant ID: ${res.data.tenantId} | Plan: ${res.data.plan} | Free submissions: ${res.data.trialFreeSubmissions}`;
+
+    form.reset();
+
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1500);
+  } catch (err) {
+    result.textContent = "Error saving onboarding data";
+  }
+};
   </script>
 </body>
 </html>
