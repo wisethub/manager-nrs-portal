@@ -64,10 +64,10 @@ document.getElementById("enterpriseMessage").textContent =
     const documentsList = document.getElementById("documentsList");
 
 if (documentsRes.success && documentsRes.data.length > 0) {
-  documentsList.innerHTML = [...documentsRes.data].reverse().map(doc =>
+  documentsList.innerHTML = documentsRes.data.map(doc =>
   `<li>
-    ${doc.documentNumber} | ${doc.documentType} | ${doc.transmissionStatus} |
-    Payment: ${doc.paymentStatus === "PAID" ? "PAID" : "PENDING"}
+    ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
+    Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
     ${doc.paymentStatus !== "PAID"
       ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
       : ""}
