@@ -22,119 +22,127 @@
     <p><input type="text" id="cryptographic_key" placeholder="Cryptographic Key" /></p>
     <p><input type="text" id="public_key" placeholder="Public Key" /></p>
     <p><input type="text" id="service_id" placeholder="Service ID" /></p>
-    <p><button type="button" onclick="runOnboardingSave(event)">Save</button></p>
-    <p><button type="button" id="testNrsBtn" onclick="runNrsTest()">Test NRS Connection</button></p>
+
+    <p><button type="button" onclick="runOnboardingSave()">Save</button></p>
+    <p><button type="button" onclick="runNrsTest()">Test NRS Connection</button></p>
   </form>
 
   <p id="result"></p>
   <p id="nrsTestResult"></p>
 
   <p><a href="index.html">Back to Home</a></p>
-<p><a href="dashboard.html">Go to Dashboard</a></p>
+  <p><a href="dashboard.html">Go to Dashboard</a></p>
 
   <script src="assets/js/api.js"></script>
   <script>
-    const existingTenantId = localStorage.getItem("tenantId");
-
-// Temporary: disable auto-redirect while testing save flow
-// if (existingTenantId) {
-//   window.location.href = "dashboard.html";
-// }
     const form = document.getElementById("onboardingForm");
     const result = document.getElementById("result");
-    let nrsTestPassed = false;
     const nrsTestResult = document.getElementById("nrsTestResult");
-  window.runNrsTest = async function () {
-  const tin = document.getElementById("tin").value.trim();
-  const registeredEmail = document.getElementById("registered_email").value.trim();
-  const apiKey = document.getElementById("api_key").value.trim();
-  const clientSecret = document.getElementById("client_secret").value.trim();
-  const cryptographicKey = document.getElementById("cryptographic_key").value.trim();
-  const publicKey = document.getElementById("public_key").value.trim();
-  const serviceId = document.getElementById("service_id").value.trim();
 
-  if (
-  !tin ||
-  !registeredEmail ||
-  !apiKey ||
-  !clientSecret ||
-  !cryptographicKey ||
-  !publicKey ||
-  !serviceId
-) {
-  nrsTestPassed = false;
-  nrsTestResult.textContent =
-    "Please fill TIN, Registered Email, API Key, Client Secret, Cryptographic Key, Public Key, and Service ID before testing.";
-  return;
-}
+    let nrsTestPassed = false;
 
-  const payload = {
-    tin,
-    registered_email: registeredEmail,
-    base_url: document.getElementById("base_url").value,
-    report_base_url: document.getElementById("report_base_url").value,
-    entity_id: document.getElementById("entity_id").value,
-    business_id: document.getElementById("business_id").value,
-    api_key: apiKey,
-    client_secret: clientSecret,
-    irn_template: document.getElementById("irn_template").value,
-    cryptographic_key: cryptographicKey,
-    public_key: publicKey,
-    service_id: serviceId
-  };
+    window.runNrsTest = async function () {
+      const tin = document.getElementById("tin").value.trim();
+      const registeredEmail = document.getElementById("registered_email").value.trim();
+      const apiKey = document.getElementById("api_key").value.trim();
+      const clientSecret = document.getElementById("client_secret").value.trim();
+      const cryptographicKey = document.getElementById("cryptographic_key").value.trim();
+      const publicKey = document.getElementById("public_key").value.trim();
+      const serviceId = document.getElementById("service_id").value.trim();
 
-  try {
-    const res = await testNrsConnection(payload);
+      if (
+        !tin ||
+        !registeredEmail ||
+        !apiKey ||
+        !clientSecret ||
+        !cryptographicKey ||
+        !publicKey ||
+        !serviceId
+      ) {
+        nrsTestPassed = false;
+        nrsTestResult.textContent =
+          "Please fill TIN, Registered Email, API Key, Client Secret, Cryptographic Key, Public Key, and Service ID before testing.";
+        return;
+      }
 
-    nrsTestResult.textContent =
-      `${res.message} | API Key present: ${res.data.api_key_present} | Client Secret present: ${res.data.client_secret_present} | Crypto Key present: ${res.data.cryptographic_key_present} | Public Key present: ${res.data.public_key_present} | Service ID: ${res.data.service_id || "missing"}`;
-    nrsTestPassed = true;
-  } } catch (err) {
-  nrsTestPassed = false;
-  nrsTestResult.textContent = "Error testing NRS connection";
-}
-};
-       window.runOnboardingSave = async function (e) {
-  e.preventDefault();
+      const payload = {
+        tin,
+        registered_email: registeredEmail,
+        base_url: document.getElementById("base_url").value.trim(),
+        report_base_url: document.getElementById("report_base_url").value.trim(),
+        entity_id: document.getElementById("entity_id").value.trim(),
+        business_id: document.getElementById("business_id").value.trim(),
+        api_key: apiKey,
+        client_secret: clientSecret,
+        irn_template: document.getElementById("irn_template").value.trim(),
+        cryptographic_key: cryptographicKey,
+        public_key: publicKey,
+        service_id: serviceId
+      };
 
-  if (!nrsTestPassed) {
-    result.textContent = "Please test NRS connection successfully before saving.";
-    return;
-  }
+      try {
+        const res = await testNrsConnection(payload);
 
-  const payload = {
-    business_name: document.getElementById("business_name").value,
-    tin: document.getElementById("tin").value,
-    registered_email: document.getElementById("registered_email").value,
-    base_url: document.getElementById("base_url").value,
-    report_base_url: document.getElementById("report_base_url").value,
-    entity_id: document.getElementById("entity_id").value,
-    business_id: document.getElementById("business_id").value,
-    api_key: document.getElementById("api_key").value,
-    client_secret: document.getElementById("client_secret").value,
-    irn_template: document.getElementById("irn_template").value,
-    cryptographic_key: document.getElementById("cryptographic_key").value,
-    public_key: document.getElementById("public_key").value,
-    service_id: document.getElementById("service_id").value
-  };
+        if (!res.success) {
+          nrsTestPassed = false;
+          nrsTestResult.textContent = res.message || "NRS test failed";
+          return;
+        }
 
-  try {
-    const res = await onboardTenant(payload);
+        nrsTestPassed = true;
+        nrsTestResult.textContent =
+          `${res.message} | API Key present: ${res.data.api_key_present} | Client Secret present: ${res.data.client_secret_present} | Crypto Key present: ${res.data.cryptographic_key_present} | Public Key present: ${res.data.public_key_present} | Service ID: ${res.data.service_id || "missing"}`;
+      } catch (err) {
+        nrsTestPassed = false;
+        nrsTestResult.textContent = "Error testing NRS connection";
+      }
+    };
 
-    localStorage.setItem("tenantId", res.data.tenantId);
+    window.runOnboardingSave = async function () {
+      if (!nrsTestPassed) {
+        result.textContent = "Please test NRS connection successfully before saving.";
+        return;
+      }
 
-    result.textContent =
-      `${res.message} | Tenant ID: ${res.data.tenantId} | Plan: ${res.data.plan} | Free submissions: ${res.data.trialFreeSubmissions}`;
+      const payload = {
+        business_name: document.getElementById("business_name").value.trim(),
+        tin: document.getElementById("tin").value.trim(),
+        registered_email: document.getElementById("registered_email").value.trim(),
+        base_url: document.getElementById("base_url").value.trim(),
+        report_base_url: document.getElementById("report_base_url").value.trim(),
+        entity_id: document.getElementById("entity_id").value.trim(),
+        business_id: document.getElementById("business_id").value.trim(),
+        api_key: document.getElementById("api_key").value.trim(),
+        client_secret: document.getElementById("client_secret").value.trim(),
+        irn_template: document.getElementById("irn_template").value.trim(),
+        cryptographic_key: document.getElementById("cryptographic_key").value.trim(),
+        public_key: document.getElementById("public_key").value.trim(),
+        service_id: document.getElementById("service_id").value.trim()
+      };
 
-    form.reset();
+      try {
+        const res = await onboardTenant(payload);
 
-    setTimeout(() => {
-      window.location.href = "dashboard.html";
-    }, 1500);
-  } catch (err) {
-    result.textContent = "Error saving onboarding data";
-  }
-};
+        if (!res.success) {
+          result.textContent = res.message || "Error saving onboarding data";
+          return;
+        }
+
+        localStorage.setItem("tenantId", res.data.tenantId);
+
+        result.textContent =
+          `${res.message} | Tenant ID: ${res.data.tenantId} | Plan: ${res.data.plan} | Free submissions: ${res.data.trialFreeSubmissions}`;
+
+        form.reset();
+        nrsTestPassed = false;
+
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1500);
+      } catch (err) {
+        result.textContent = "Error saving onboarding data";
+      }
+    };
   </script>
 </body>
 </html>
