@@ -18,6 +18,14 @@
   <p id="documentCount">Total documents: loading...</p>
   <p id="paidCount">Paid documents: loading...</p>
   <p id="pendingCount">Pending documents: loading...</p>
+  <p>
+  <label for="statusFilter">Filter by payment status:</label>
+  <select id="statusFilter">
+    <option value="ALL">All</option>
+    <option value="PAID">PAID</option>
+    <option value="PENDING">PENDING</option>
+  </select>
+</p>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
   <p><button id="submitCreditNoteBtn">Submit Test Credit Note</button></p>
   <p id="submitResult"></p>
@@ -65,6 +73,7 @@ document.getElementById("enterpriseMessage").textContent =
       document.getElementById("tenantDetails").textContent = "Tenant details not found";
     }
     const documentsList = document.getElementById("documentsList");
+    const statusFilter = document.getElementById("statusFilter");
 const documentCount = document.getElementById("documentCount");
 const paidCount = document.getElementById("paidCount");
 const pendingCount = document.getElementById("pendingCount");
@@ -76,15 +85,20 @@ if (documentsRes.success && documentsRes.data.length > 0) {
   paidCount.textContent = `Paid documents: ${paidTotal}`;
   pendingCount.textContent = `Pending documents: ${pendingTotal}`;
 
-  documentsList.innerHTML = documentsRes.data.map(doc =>
-    `<li>
-      ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
-      Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
-      ${doc.paymentStatus !== "PAID"
-        ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
-        : ""}
-    </li>`
-  ).join("");
+  const selectedStatus = statusFilter.value;
+const filteredDocuments = selectedStatus === "ALL"
+  ? documentsRes.data
+  : documentsRes.data.filter(doc => doc.paymentStatus === selectedStatus);
+
+documentsList.innerHTML = filteredDocuments.map(doc =>
+  `<li>
+    ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
+    Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
+    ${doc.paymentStatus !== "PAID"
+      ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
+      : ""}
+  </li>`
+).join("");
 } else {
   documentCount.textContent = "Total documents: 0";
   paidCount.textContent = "Paid documents: 0";
@@ -95,7 +109,7 @@ if (documentsRes.success && documentsRes.data.length > 0) {
 
   document.addEventListener("DOMContentLoaded", function () {
     loadDashboard();
-
+  statusFilter.addEventListener("change", loadDashboard);
     document.getElementById("submitDocBtn").addEventListener("click", async function () {
       const tenantId = localStorage.getItem("tenantId") || "123";
 
