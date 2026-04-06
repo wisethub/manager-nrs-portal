@@ -41,7 +41,33 @@ if (existingTenantId) {
 }
     const form = document.getElementById("onboardingForm");
     const result = document.getElementById("result");
+    const nrsTestResult = document.getElementById("nrsTestResult");
+    const testNrsBtn = document.getElementById("testNrsBtn");
+    testNrsBtn.addEventListener("click", async function () {
+  const payload = {
+    tin: document.getElementById("tin").value,
+    registered_email: document.getElementById("registered_email").value,
+    base_url: document.getElementById("base_url").value,
+    report_base_url: document.getElementById("report_base_url").value,
+    entity_id: document.getElementById("entity_id").value,
+    business_id: document.getElementById("business_id").value,
+    api_key: document.getElementById("api_key").value,
+    client_secret: document.getElementById("client_secret").value,
+    irn_template: document.getElementById("irn_template").value,
+    cryptographic_key: document.getElementById("cryptographic_key").value,
+    public_key: document.getElementById("public_key").value,
+    service_id: document.getElementById("service_id").value
+  };
 
+  try {
+    const res = await testNrsConnection(payload);
+
+    nrsTestResult.textContent =
+      `${res.message} | API Key present: ${res.data.api_key_present} | Client Secret present: ${res.data.client_secret_present} | Crypto Key present: ${res.data.cryptographic_key_present}`;
+  } catch (err) {
+    nrsTestResult.textContent = "Error testing NRS connection";
+  }
+});
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
