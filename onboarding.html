@@ -44,29 +44,41 @@ if (existingTenantId) {
     const nrsTestResult = document.getElementById("nrsTestResult");
     const testNrsBtn = document.getElementById("testNrsBtn");
     testNrsBtn.addEventListener("click", async function () {
-  const payload = {
-    tin: document.getElementById("tin").value,
-    registered_email: document.getElementById("registered_email").value,
+    const payload = {
+    tin,
+    registered_email: registeredEmail,
     base_url: document.getElementById("base_url").value,
     report_base_url: document.getElementById("report_base_url").value,
     entity_id: document.getElementById("entity_id").value,
     business_id: document.getElementById("business_id").value,
-    api_key: document.getElementById("api_key").value,
-    client_secret: document.getElementById("client_secret").value,
-    irn_template: document.getElementById("irn_template").value,
-    cryptographic_key: document.getElementById("cryptographic_key").value,
-    public_key: document.getElementById("public_key").value,
-    service_id: document.getElementById("service_id").value
+    api_key: apiKey,
+    client_secret: clientSecret,
+    irn_template: irn_template,
+    cryptographic_key: cryptographicKey,
+    public_key: publicKey,
+    service_id: serviceId
   };
-      if (
-  !document.getElementById("tin").value ||
-  !document.getElementById("registered_email").value ||
-  !document.getElementById("api_key").value ||
-  !document.getElementById("client_secret").value ||
-  !document.getElementById("cryptographic_key").value ||
-  !document.getElementById("public_key").value ||
-  !document.getElementById("service_id").value
-) {
+       const tin = document.getElementById("tin").value.trim();
+  const registeredEmail = document.getElementById("registered_email").value.trim();
+  const apiKey = document.getElementById("api_key").value.trim();
+  const clientSecret = document.getElementById("client_secret").value.trim();
+  const cryptographicKey = document.getElementById("cryptographic_key").value.trim();
+  const publicKey = document.getElementById("public_key").value.trim();
+  const serviceId = document.getElementById("service_id").value.trim();
+
+  if (
+    !tin ||
+    !registeredEmail ||
+    !apiKey ||
+    !clientSecret ||
+    !cryptographicKey ||
+    !publicKey ||
+    !serviceId
+  ) {
+    nrsTestResult.textContent =
+      "Please fill TIN, Registered Email, API Key, Client Secret, Cryptographic Key, Public Key, and Service ID before testing.";
+    return;
+  }
   nrsTestResult.textContent =
     "Please fill TIN, Registered Email, API Key, Client Secret, Cryptographic Key, Public Key, and Service ID before testing.";
   return;
