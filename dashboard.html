@@ -26,6 +26,14 @@
     <option value="PENDING">PENDING</option>
   </select>
 </p>
+  <p>
+  <label for="typeFilter">Filter by document type:</label>
+  <select id="typeFilter">
+    <option value="ALL">All</option>
+    <option value="invoice">invoice</option>
+    <option value="credit_note">credit_note</option>
+  </select>
+</p>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
   <p><button id="submitCreditNoteBtn">Submit Test Credit Note</button></p>
   <p id="submitResult"></p>
@@ -74,6 +82,7 @@ document.getElementById("enterpriseMessage").textContent =
     }
     const documentsList = document.getElementById("documentsList");
     const statusFilter = document.getElementById("statusFilter");
+    const typeFilter = document.getElementById("typeFilter");
 const documentCount = document.getElementById("documentCount");
 const paidCount = document.getElementById("paidCount");
 const pendingCount = document.getElementById("pendingCount");
@@ -86,9 +95,15 @@ if (documentsRes.success && documentsRes.data.length > 0) {
   pendingCount.textContent = `Pending documents: ${pendingTotal}`;
 
   const selectedStatus = statusFilter.value;
-const filteredDocuments = selectedStatus === "ALL"
+const selectedType = typeFilter.value;
+
+let filteredDocuments = selectedStatus === "ALL"
   ? documentsRes.data
   : documentsRes.data.filter(doc => doc.paymentStatus === selectedStatus);
+
+filteredDocuments = selectedType === "ALL"
+  ? filteredDocuments
+  : filteredDocuments.filter(doc => doc.documentType === selectedType);
 
 documentsList.innerHTML = filteredDocuments.map(doc =>
   `<li>
@@ -110,6 +125,7 @@ documentsList.innerHTML = filteredDocuments.map(doc =>
   document.addEventListener("DOMContentLoaded", function () {
     loadDashboard();
   statusFilter.addEventListener("change", loadDashboard);
+  typeFilter.addEventListener("change", loadDashboard);
     document.getElementById("submitDocBtn").addEventListener("click", async function () {
       const tenantId = localStorage.getItem("tenantId") || "123";
 
