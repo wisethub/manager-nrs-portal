@@ -12,6 +12,7 @@
   <p id="usage">Usage: loading...</p>
   <p id="trialStatus">Trial status: loading...</p>
   <p id="upgradeMessage"></p>
+  <p id="subscriptionAction"></p>
   <p id="enterpriseMessage"></p>
   <p id="tenantBusiness">Business: loading...</p>
   <p id="tenantTin">TIN: loading...</p>
@@ -75,13 +76,16 @@ document.getElementById("enterpriseMessage").textContent =
 
   document.getElementById("upgradeMessage").textContent =
     "Upgrade options: Monthly plan NGN 50000 for up to 200 invoices/credit notes, or contact management for Enterprise.";
+
+  document.getElementById("subscriptionAction").textContent =
+    "Next action: Upgrade to Monthly, or contact management if you need Enterprise.";
 } else {
   document.getElementById("trialStatus").textContent =
     `Trial status: Active - ${usageRes.data.remaining} free submission(s) remaining.`;
 
   document.getElementById("upgradeMessage").textContent = "";
+  document.getElementById("subscriptionAction").textContent = "";
 }
-
     if (tenantRes.success) {
   document.getElementById("tenantBusiness").textContent =
     `Business: ${tenantRes.data.business_name}`;
