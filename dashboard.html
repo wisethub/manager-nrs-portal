@@ -70,7 +70,7 @@ document.getElementById("enterpriseMessage").textContent =
     
     document.getElementById("usage").textContent =
       `Usage: ${usageRes.data.used} used | ${usageRes.data.remaining} remaining out of ${usageRes.data.trialFreeSubmissions}`;
-    if (usageRes.data.remaining <= 0) {
+   if (usageRes.data.remaining <= 0) {
   document.getElementById("trialStatus").textContent =
     "Trial status: Expired - please upgrade your plan.";
 
@@ -85,7 +85,7 @@ document.getElementById("enterpriseMessage").textContent =
 
   document.getElementById("upgradeMessage").textContent = "";
   document.getElementById("subscriptionAction").textContent = "";
-}
+} else 
     if (tenantRes.success) {
   document.getElementById("tenantBusiness").textContent =
     `Business: ${tenantRes.data.business_name}`;
