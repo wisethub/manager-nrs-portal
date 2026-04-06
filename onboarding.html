@@ -58,6 +58,19 @@ if (existingTenantId) {
     public_key: document.getElementById("public_key").value,
     service_id: document.getElementById("service_id").value
   };
+      if (
+  !document.getElementById("tin").value ||
+  !document.getElementById("registered_email").value ||
+  !document.getElementById("api_key").value ||
+  !document.getElementById("client_secret").value ||
+  !document.getElementById("cryptographic_key").value ||
+  !document.getElementById("public_key").value ||
+  !document.getElementById("service_id").value
+) {
+  nrsTestResult.textContent =
+    "Please fill TIN, Registered Email, API Key, Client Secret, Cryptographic Key, Public Key, and Service ID before testing.";
+  return;
+}
 
   try {
     const res = await testNrsConnection(payload);
