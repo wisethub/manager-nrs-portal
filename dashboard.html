@@ -42,7 +42,7 @@
   <ul id="documentsList">
   <li>Loading documents...</li>
   </ul>
-
+  <p><button id="clearTenantBtn">Clear Current Tenant</button></p>
   <p><a href="index.html">Back to Home</a></p>
 
   <script src="assets/js/api.js"></script>
@@ -85,6 +85,7 @@ document.getElementById("enterpriseMessage").textContent =
     const statusFilter = document.getElementById("statusFilter");
     const typeFilter = document.getElementById("typeFilter");
     const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    const clearTenantBtn = document.getElementById("clearTenantBtn");
 const documentCount = document.getElementById("documentCount");
 const paidCount = document.getElementById("paidCount");
 const pendingCount = document.getElementById("pendingCount");
@@ -132,6 +133,10 @@ documentsList.innerHTML = filteredDocuments.map(doc =>
   statusFilter.value = "ALL";
   typeFilter.value = "ALL";
   loadDashboard();
+});
+    clearTenantBtn.addEventListener("click", function () {
+  localStorage.removeItem("tenantId");
+  window.location.href = "onboarding.html";
 });
     document.getElementById("submitDocBtn").addEventListener("click", async function () {
       const tenantId = localStorage.getItem("tenantId") || "123";
