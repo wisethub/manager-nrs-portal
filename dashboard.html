@@ -50,100 +50,119 @@
 
   <script src="assets/js/api.js"></script>
 <script>
-  async function loadDashboard() {
-    const tenantId = localStorage.getItem("tenantId");
-
-if (!tenantId) {
-  window.location.href = "onboarding.html";
-  return;
+  async function fetchWithTimeout(promiseFactory, timeoutMs = 15000) {
+  return Promise.race([
+    promiseFactory(),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
+    )
+  ]);
 }
+  async function loadDashboard() {
+  const tenantId = localStorage.getItem("tenantId");
 
-    const planRes = await getPlan(tenantId);
-    const usageRes = await getUsage(tenantId);
-    const tenantRes = await getTenant(tenantId);
-    const documentsRes = await getDocuments(tenantId);
+  if (!tenantId) {
+    window.location.href = "onboarding.html";
+    return;
+  }
+
+  try {
+    const [planRes, usageRes, tenantRes, documentsRes] = await Promise.all([
+      fetchWithTimeout(() => getPlan(tenantId)),
+      fetchWithTimeout(() => getUsage(tenantId)),
+      fetchWithTimeout(() => getTenant(tenantId)),
+      fetchWithTimeout(() => getDocuments(tenantId))
+    ]);
 
     document.getElementById("plan").textContent =
-  `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Subscription status: ${planRes.data.subscriptionStatus} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
-document.getElementById("enterpriseMessage").textContent =
-  planRes.data.enterpriseMessage || "";
-    
+      `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Subscription status: ${planRes.data.subscriptionStatus} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
+
+    document.getElementById("enterpriseMessage").textContent =
+      planRes.data.enterpriseMessage || "";
+
     document.getElementById("usage").textContent =
       `Usage: ${usageRes.data.used} used | ${usageRes.data.remaining} remaining out of ${usageRes.data.trialFreeSubmissions}`;
-   if (usageRes.data.remaining <= 0) {
-  document.getElementById("trialStatus").textContent =
-    "Trial status: Expired - please upgrade your plan.";
 
-  document.getElementById("upgradeMessage").textContent =
-    "Upgrade options: Monthly plan NGN 50000 for up to 200 invoices/credit notes, or contact management for Enterprise.";
+    if (usageRes.data.remaining <= 0) {
+      document.getElementById("trialStatus").textContent =
+        "Trial status: Expired - please upgrade your plan.";
 
-  document.getElementById("subscriptionAction").textContent =
-    "Next action: Upgrade to Monthly, or contact management if you need Enterprise.";
-} else {
-  document.getElementById("trialStatus").textContent =
-    `Trial status: Active - ${usageRes.data.remaining} free submission(s) remaining.`;
+      document.getElementById("upgradeMessage").textContent =
+        "Upgrade options: Monthly plan NGN 50000 for up to 200 invoices/credit notes, or contact management for Enterprise.";
 
-  document.getElementById("upgradeMessage").textContent = "";
-  document.getElementById("subscriptionAction").textContent = "";
-} else 
+      document.getElementById("subscriptionAction").textContent =
+        "Next action: Upgrade to Monthly, or contact management if you need Enterprise.";
+    } else {
+      document.getElementById("trialStatus").textContent =
+        `Trial status: Active - ${usageRes.data.remaining} free submission(s) remaining.`;
+
+      document.getElementById("upgradeMessage").textContent = "";
+      document.getElementById("subscriptionAction").textContent = "";
+    }
+
     if (tenantRes.success) {
-  document.getElementById("tenantBusiness").textContent =
-    `Business: ${tenantRes.data.business_name}`;
-  document.getElementById("tenantTin").textContent =
-    `TIN: ${tenantRes.data.tin}`;
-  document.getElementById("tenantEmail").textContent =
-    `Email: ${tenantRes.data.registered_email}`;
-} else {
-  document.getElementById("tenantBusiness").textContent = "Business: not found";
-  document.getElementById("tenantTin").textContent = "TIN: not found";
-  document.getElementById("tenantEmail").textContent = "Email: not found";
-}
+      document.getElementById("tenantBusiness").textContent =
+        `Business: ${tenantRes.data.business_name}`;
+      document.getElementById("tenantTin").textContent =
+        `TIN: ${tenantRes.data.tin}`;
+      document.getElementById("tenantEmail").textContent =
+        `Email: ${tenantRes.data.registered_email}`;
+    } else {
+      document.getElementById("tenantBusiness").textContent = "Business: not found";
+      document.getElementById("tenantTin").textContent = "TIN: not found";
+      document.getElementById("tenantEmail").textContent = "Email: not found";
+    }
     const documentsList = document.getElementById("documentsList");
+    const documentCount = document.getElementById("documentCount");
+    const paidCount = document.getElementById("paidCount");
+    const pendingCount = document.getElementById("pendingCount");
     const statusFilter = document.getElementById("statusFilter");
     const typeFilter = document.getElementById("typeFilter");
-    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
-    const clearTenantBtn = document.getElementById("clearTenantBtn");
-const documentCount = document.getElementById("documentCount");
-const paidCount = document.getElementById("paidCount");
-const pendingCount = document.getElementById("pendingCount");
-if (documentsRes.success && documentsRes.data.length > 0) {
-  const paidTotal = documentsRes.data.filter(doc => doc.paymentStatus === "PAID").length;
-  const pendingTotal = documentsRes.data.filter(doc => doc.paymentStatus !== "PAID").length;
 
-  documentCount.textContent = `Total documents: ${documentsRes.data.length}`;
-  paidCount.textContent = `Paid documents: ${paidTotal}`;
-  pendingCount.textContent = `Pending documents: ${pendingTotal}`;
+    if (documentsRes.success && documentsRes.data.length > 0) {
+      const paidTotal = documentsRes.data.filter(doc => doc.paymentStatus === "PAID").length;
+      const pendingTotal = documentsRes.data.filter(doc => doc.paymentStatus !== "PAID").length;
 
-  const selectedStatus = statusFilter.value;
-const selectedType = typeFilter.value;
+      documentCount.textContent = `Total documents: ${documentsRes.data.length}`;
+      paidCount.textContent = `Paid documents: ${paidTotal}`;
+      pendingCount.textContent = `Pending documents: ${pendingTotal}`;
 
-let filteredDocuments = selectedStatus === "ALL"
-  ? documentsRes.data
-  : documentsRes.data.filter(doc => doc.paymentStatus === selectedStatus);
+      const selectedStatus = statusFilter.value;
+      const selectedType = typeFilter.value;
 
-filteredDocuments = selectedType === "ALL"
-  ? filteredDocuments
-  : filteredDocuments.filter(doc => doc.documentType === selectedType);
+      let filteredDocuments = selectedStatus === "ALL"
+        ? documentsRes.data
+        : documentsRes.data.filter(doc => doc.paymentStatus === selectedStatus);
 
-documentsList.innerHTML = filteredDocuments.map(doc =>
-  `<li>
-    ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
-    Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
-    ${doc.paymentStatus !== "PAID"
-      ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
-      : ""}
-  </li>`
-).join("");
-} else {
-  documentCount.textContent = "Total documents: 0";
-  paidCount.textContent = "Paid documents: 0";
-  pendingCount.textContent = "Pending documents: 0";
-  documentsList.innerHTML =
-  usageRes.data.remaining > 0
-    ? `<li>No documents submitted yet. Trial is active with ${usageRes.data.remaining} free submission(s) remaining. Submit a test invoice or credit note to begin.</li>`
-    : `<li>No documents submitted yet. Trial has expired. Upgrade to the monthly plan or contact management for Enterprise.</li>`;
-}
+      filteredDocuments = selectedType === "ALL"
+        ? filteredDocuments
+        : filteredDocuments.filter(doc => doc.documentType === selectedType);
+
+      documentsList.innerHTML = filteredDocuments.map(doc =>
+        `<li>
+          ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
+          Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
+          ${doc.paymentStatus !== "PAID"
+            ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
+            : ""}
+        </li>`
+      ).join("");
+    } else {
+      documentCount.textContent = "Total documents: 0";
+      paidCount.textContent = "Paid documents: 0";
+      pendingCount.textContent = "Pending documents: 0";
+
+      documentsList.innerHTML =
+        usageRes.data.remaining > 0
+          ? `<li>No documents submitted yet. Trial is active with ${usageRes.data.remaining} free submission(s) remaining. Submit a test invoice or credit note to begin.</li>`
+          : `<li>No documents submitted yet. Trial has expired. Upgrade to the monthly plan or contact management for Enterprise.</li>`;
+    }
+  } catch (err) {
+    document.getElementById("plan").textContent = "Plan: failed to load";
+    document.getElementById("usage").textContent = "Usage: failed to load";
+    document.getElementById("trialStatus").textContent = `Dashboard load error: ${err.message}`;
   }
+}
 
   document.addEventListener("DOMContentLoaded", function () {
     loadDashboard();
