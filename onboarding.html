@@ -36,9 +36,10 @@
   <script>
     const existingTenantId = localStorage.getItem("tenantId");
 
-if (existingTenantId) {
-  window.location.href = "dashboard.html";
-}
+// Temporary: disable auto-redirect while testing save flow
+// if (existingTenantId) {
+//   window.location.href = "dashboard.html";
+// }
     const form = document.getElementById("onboardingForm");
     const result = document.getElementById("result");
     let nrsTestPassed = false;
