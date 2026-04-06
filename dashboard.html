@@ -34,6 +34,7 @@
     <option value="credit_note">credit_note</option>
   </select>
 </p>
+  <p><button id="resetFiltersBtn">Reset Filters</button></p>
   <p><button id="submitDocBtn">Submit Test Invoice</button></p>
   <p><button id="submitCreditNoteBtn">Submit Test Credit Note</button></p>
   <p id="submitResult"></p>
@@ -83,6 +84,7 @@ document.getElementById("enterpriseMessage").textContent =
     const documentsList = document.getElementById("documentsList");
     const statusFilter = document.getElementById("statusFilter");
     const typeFilter = document.getElementById("typeFilter");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
 const documentCount = document.getElementById("documentCount");
 const paidCount = document.getElementById("paidCount");
 const pendingCount = document.getElementById("pendingCount");
@@ -126,6 +128,11 @@ documentsList.innerHTML = filteredDocuments.map(doc =>
     loadDashboard();
   statusFilter.addEventListener("change", loadDashboard);
   typeFilter.addEventListener("change", loadDashboard);
+  resetFiltersBtn.addEventListener("click", function () {
+  statusFilter.value = "ALL";
+  typeFilter.value = "ALL";
+  loadDashboard();
+});
     document.getElementById("submitDocBtn").addEventListener("click", async function () {
       const tenantId = localStorage.getItem("tenantId") || "123";
 
