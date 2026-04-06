@@ -63,7 +63,7 @@ if (existingTenantId) {
     const res = await testNrsConnection(payload);
 
     nrsTestResult.textContent =
-      `${res.message} | API Key present: ${res.data.api_key_present} | Client Secret present: ${res.data.client_secret_present} | Crypto Key present: ${res.data.cryptographic_key_present}`;
+  `${res.message} | API Key present: ${res.data.api_key_present} | Client Secret present: ${res.data.client_secret_present} | Crypto Key present: ${res.data.cryptographic_key_present} | Public Key present: ${res.data.public_key_present} | Service ID: ${res.data.service_id || "missing"}`;
   } catch (err) {
     nrsTestResult.textContent = "Error testing NRS connection";
   }
