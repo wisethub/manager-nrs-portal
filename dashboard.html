@@ -1,275 +1,282 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard</title>
-</head>
-<body>
-  <h1>Tenant Dashboard</h1>
-
-  <p id="plan">Plan: loading...</p>
-  <p id="usage">Usage: loading...</p>
-  <p id="trialStatus">Trial status: loading...</p>
-  <p id="upgradeMessage"></p>
-  <p id="subscriptionAction"></p>
-  <p id="enterpriseMessage"></p>
-  <p id="tenantBusiness">Business: loading...</p>
-  <p id="tenantTin">TIN: loading...</p>
-  <p id="tenantEmail">Email: loading...</p>
-  <h2>Document Log</h2>
-  <p id="documentCount">Total documents: loading...</p>
-  <p id="paidCount">Paid documents: loading...</p>
-  <p id="pendingCount">Pending documents: loading...</p>
-  <p>
-  <label for="statusFilter">Filter by payment status:</label>
-  <select id="statusFilter">
-    <option value="ALL">All</option>
-    <option value="PAID">PAID</option>
-    <option value="PENDING">PENDING</option>
-  </select>
-</p>
-  <p>
-  <label for="typeFilter">Filter by document type:</label>
-  <select id="typeFilter">
-    <option value="ALL">All</option>
-    <option value="invoice">invoice</option>
-    <option value="credit_note">credit_note</option>
-  </select>
-</p>
-  <p><button id="resetFiltersBtn">Reset Filters</button></p>
-  <p><button id="submitDocBtn">Submit Test Invoice</button></p>
-  <p><button id="submitCreditNoteBtn">Submit Test Credit Note</button></p>
-  <p id="submitResult"></p>
-  <p id="paymentResult"></p>
-  <ul id="documentsList">
-  <li>Loading documents...</li>
-  </ul>
-  <p><button id="clearTenantBtn">Clear Current Tenant</button></p>
-  <p><a href="index.html">Back to Home</a></p>
-
-  <script src="assets/js/api.js"></script>
+<script src="assets/js/api.js"></script>
 <script>
-  async function fetchWithTimeout(promiseFactory, timeoutMs = 60000) {
-  return Promise.race([
-    promiseFactory(),
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
-    )
-  ]);
-}
-  async function loadDashboard() {
-  const tenantId = localStorage.getItem("tenantId");
+  const planEl = document.getElementById("plan");
+  const usageEl = document.getElementById("usage");
+  const trialStatusEl = document.getElementById("trialStatus");
+  const upgradeMessageEl = document.getElementById("upgradeMessage");
+  const subscriptionActionEl = document.getElementById("subscriptionAction");
+  const enterpriseMessageEl = document.getElementById("enterpriseMessage");
+  const tenantBusinessEl = document.getElementById("tenantBusiness");
+  const tenantTinEl = document.getElementById("tenantTin");
+  const tenantEmailEl = document.getElementById("tenantEmail");
+  const documentCountEl = document.getElementById("documentCount");
+  const paidCountEl = document.getElementById("paidCount");
+  const pendingCountEl = document.getElementById("pendingCount");
+  const statusFilterEl = document.getElementById("statusFilter");
+  const typeFilterEl = document.getElementById("typeFilter");
+  const resetFiltersBtnEl = document.getElementById("resetFiltersBtn");
+  const submitDocBtnEl = document.getElementById("submitDocBtn");
+  const submitCreditNoteBtnEl = document.getElementById("submitCreditNoteBtn");
+  const submitResultEl = document.getElementById("submitResult");
+  const paymentResultEl = document.getElementById("paymentResult");
+  const documentsListEl = document.getElementById("documentsList");
+  const clearTenantBtnEl = document.getElementById("clearTenantBtn");
 
-  if (!tenantId) {
-    window.location.href = "onboarding.html";
-    return;
+  async function fetchWithTimeout(promiseFactory, timeoutMs = 60000) {
+    return Promise.race([
+      promiseFactory(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Request timed out")), timeoutMs)
+      )
+    ]);
   }
 
-  try {
-    const [planRes, usageRes, tenantRes, documentsRes] = await Promise.all([
+  async function wakeBackend() {
+    try {
+      await fetchWithTimeout(() => fetch(`${API_BASE_URL}/health`), 20000);
+    } catch (err) {
+      // ignore here; real errors will show below
+    }
+  }
+
+  function renderDocuments(documents, remaining) {
+    const paidTotal = documents.filter(doc => doc.paymentStatus === "PAID").length;
+    const pendingTotal = documents.filter(doc => doc.paymentStatus !== "PAID").length;
+
+    documentCountEl.textContent = `Total documents: ${documents.length}`;
+    paidCountEl.textContent = `Paid documents: ${paidTotal}`;
+    pendingCountEl.textContent = `Pending documents: ${pendingTotal}`;
+
+    const selectedStatus = statusFilterEl.value;
+    const selectedType = typeFilterEl.value;
+
+    let filteredDocuments = selectedStatus === "ALL"
+      ? documents
+      : documents.filter(doc => doc.paymentStatus === selectedStatus);
+
+    filteredDocuments = selectedType === "ALL"
+      ? filteredDocuments
+      : filteredDocuments.filter(doc => doc.documentType === selectedType);
+
+    if (filteredDocuments.length === 0) {
+      documentsListEl.innerHTML = "<li>No documents match the current filters.</li>";
+      return;
+    }
+
+    documentsListEl.innerHTML = filteredDocuments.map(doc =>
+      `<li>
+        ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
+        Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
+        ${doc.irn ? ` | IRN: ${doc.irn}` : ""}
+        ${doc.paymentStatus !== "PAID"
+          ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
+          : ""}
+      </li>`
+    ).join("");
+  }
+
+  async function loadDashboard() {
+    const tenantId = localStorage.getItem("tenantId");
+
+    if (!tenantId) {
+      window.location.href = "onboarding.html";
+      return;
+    }
+
+    planEl.textContent = "Plan: loading...";
+    usageEl.textContent = "Usage: loading...";
+    trialStatusEl.textContent = "Trial status: loading...";
+    tenantBusinessEl.textContent = "Business: loading...";
+    tenantTinEl.textContent = "TIN: loading...";
+    tenantEmailEl.textContent = "Email: loading...";
+    documentCountEl.textContent = "Total documents: loading...";
+    paidCountEl.textContent = "Paid documents: loading...";
+    pendingCountEl.textContent = "Pending documents: loading...";
+    documentsListEl.innerHTML = "<li>Loading documents...</li>";
+
+    await wakeBackend();
+
+    const [planRes, usageRes, tenantRes, documentsRes] = await Promise.allSettled([
       fetchWithTimeout(() => getPlan(tenantId)),
       fetchWithTimeout(() => getUsage(tenantId)),
       fetchWithTimeout(() => getTenant(tenantId)),
       fetchWithTimeout(() => getDocuments(tenantId))
     ]);
 
-    document.getElementById("plan").textContent =
-      `Tenant: ${tenantId} | Plan: ${planRes.data.plan} | Subscription status: ${planRes.data.subscriptionStatus} | Monthly limit: ${planRes.data.monthlyPlanLimit} | Price: NGN ${planRes.data.monthlyPlanPriceNgn}`;
-
-    document.getElementById("enterpriseMessage").textContent =
-      planRes.data.enterpriseMessage || "";
-
-    document.getElementById("usage").textContent =
-      `Usage: ${usageRes.data.used} used | ${usageRes.data.remaining} remaining out of ${usageRes.data.trialFreeSubmissions}`;
-
-    if (usageRes.data.remaining <= 0) {
-      document.getElementById("trialStatus").textContent =
-        "Trial status: Expired - please upgrade your plan.";
-
-      document.getElementById("upgradeMessage").textContent =
-        "Upgrade options: Monthly plan NGN 50000 for up to 200 invoices/credit notes, or contact management for Enterprise.";
-
-      document.getElementById("subscriptionAction").textContent =
-        "Next action: Upgrade to Monthly, or contact management if you need Enterprise.";
+    if (planRes.status === "fulfilled") {
+      const planData = planRes.value.data;
+      planEl.textContent =
+        `Tenant: ${tenantId} | Plan: ${planData.plan} | Subscription status: ${planData.subscriptionStatus} | Monthly limit: ${planData.monthlyPlanLimit} | Price: NGN ${planData.monthlyPlanPriceNgn}`;
+      enterpriseMessageEl.textContent = planData.enterpriseMessage || "";
     } else {
-      document.getElementById("trialStatus").textContent =
-        `Trial status: Active - ${usageRes.data.remaining} free submission(s) remaining.`;
-
-      document.getElementById("upgradeMessage").textContent = "";
-      document.getElementById("subscriptionAction").textContent = "";
+      planEl.textContent = `Plan error: ${planRes.reason.message}`;
     }
 
-    if (tenantRes.success) {
-      document.getElementById("tenantBusiness").textContent =
-        `Business: ${tenantRes.data.business_name}`;
-      document.getElementById("tenantTin").textContent =
-        `TIN: ${tenantRes.data.tin}`;
-      document.getElementById("tenantEmail").textContent =
-        `Email: ${tenantRes.data.registered_email}`;
+    let remaining = 0;
+
+    if (usageRes.status === "fulfilled") {
+      const usageData = usageRes.value.data;
+      remaining = Number(usageData.remaining || 0);
+
+      usageEl.textContent =
+        `Usage: ${usageData.used} used | ${usageData.remaining} remaining out of ${usageData.trialFreeSubmissions}`;
+
+      if (remaining <= 0) {
+        trialStatusEl.textContent = "Trial status: Expired - please upgrade your plan.";
+        upgradeMessageEl.textContent =
+          "Upgrade options: Monthly plan NGN 50000 for up to 200 invoices/credit notes, or contact management for Enterprise.";
+        subscriptionActionEl.textContent =
+          "Next action: Upgrade to Monthly, or contact management if you need Enterprise.";
+      } else {
+        trialStatusEl.textContent =
+          `Trial status: Active - ${usageData.remaining} free submission(s) remaining.`;
+        upgradeMessageEl.textContent = "";
+        subscriptionActionEl.textContent = "";
+      }
     } else {
-      document.getElementById("tenantBusiness").textContent = "Business: not found";
-      document.getElementById("tenantTin").textContent = "TIN: not found";
-      document.getElementById("tenantEmail").textContent = "Email: not found";
+      usageEl.textContent = `Usage error: ${usageRes.reason.message}`;
+      trialStatusEl.textContent = "Could not load trial usage.";
     }
-    const documentsList = document.getElementById("documentsList");
-    const documentCount = document.getElementById("documentCount");
-    const paidCount = document.getElementById("paidCount");
-    const pendingCount = document.getElementById("pendingCount");
-    const statusFilter = document.getElementById("statusFilter");
-    const typeFilter = document.getElementById("typeFilter");
 
-    if (documentsRes.success && documentsRes.data.length > 0) {
-      const paidTotal = documentsRes.data.filter(doc => doc.paymentStatus === "PAID").length;
-      const pendingTotal = documentsRes.data.filter(doc => doc.paymentStatus !== "PAID").length;
-
-      documentCount.textContent = `Total documents: ${documentsRes.data.length}`;
-      paidCount.textContent = `Paid documents: ${paidTotal}`;
-      pendingCount.textContent = `Pending documents: ${pendingTotal}`;
-
-      const selectedStatus = statusFilter.value;
-      const selectedType = typeFilter.value;
-
-      let filteredDocuments = selectedStatus === "ALL"
-        ? documentsRes.data
-        : documentsRes.data.filter(doc => doc.paymentStatus === selectedStatus);
-
-      filteredDocuments = selectedType === "ALL"
-        ? filteredDocuments
-        : filteredDocuments.filter(doc => doc.documentType === selectedType);
-
-      documentsList.innerHTML = filteredDocuments.map(doc =>
-        `<li>
-          ID: ${doc.id} | Number: ${doc.documentNumber} | Type: ${doc.documentType} |
-          Transmission: ${doc.transmissionStatus} | Payment: ${doc.paymentStatus}
-          ${doc.paymentStatus !== "PAID"
-            ? `<button onclick="markPaid('${doc.id}')">Mark as Paid</button>`
-            : ""}
-        </li>`
-      ).join("");
+    if (tenantRes.status === "fulfilled" && tenantRes.value.success) {
+      tenantBusinessEl.textContent = `Business: ${tenantRes.value.data.business_name}`;
+      tenantTinEl.textContent = `TIN: ${tenantRes.value.data.tin}`;
+      tenantEmailEl.textContent = `Email: ${tenantRes.value.data.registered_email}`;
+    } else if (tenantRes.status === "fulfilled") {
+      tenantBusinessEl.textContent = "Business: not found";
+      tenantTinEl.textContent = "TIN: not found";
+      tenantEmailEl.textContent = "Email: not found";
     } else {
-      documentCount.textContent = "Total documents: 0";
-      paidCount.textContent = "Paid documents: 0";
-      pendingCount.textContent = "Pending documents: 0";
-
-      documentsList.innerHTML =
-        usageRes.data.remaining > 0
-          ? `<li>No documents submitted yet. Trial is active with ${usageRes.data.remaining} free submission(s) remaining. Submit a test invoice or credit note to begin.</li>`
-          : `<li>No documents submitted yet. Trial has expired. Upgrade to the monthly plan or contact management for Enterprise.</li>`;
+      tenantBusinessEl.textContent = `Business error: ${tenantRes.reason.message}`;
+      tenantTinEl.textContent = "TIN: error";
+      tenantEmailEl.textContent = "Email: error";
     }
-  } catch (err) {
-  document.getElementById("plan").textContent = "Plan: waiting for backend...";
-  document.getElementById("usage").textContent = "Usage: waiting for backend...";
-  document.getElementById("trialStatus").textContent =
-    "Dashboard is waiting for the Render backend to wake up. Refresh again in a few seconds.";
-  document.getElementById("enterpriseMessage").textContent = "";
-  document.getElementById("subscriptionAction").textContent = "";
-}
-}
+
+    if (documentsRes.status === "fulfilled" && documentsRes.value.success) {
+      const docs = documentsRes.value.data || [];
+
+      if (docs.length > 0) {
+        renderDocuments(docs, remaining);
+      } else {
+        documentCountEl.textContent = "Total documents: 0";
+        paidCountEl.textContent = "Paid documents: 0";
+        pendingCountEl.textContent = "Pending documents: 0";
+
+        documentsListEl.innerHTML =
+          remaining > 0
+            ? `<li>No documents submitted yet. Trial is active with ${remaining} free submission(s) remaining. Submit a test invoice or credit note to begin.</li>`
+            : `<li>No documents submitted yet. Trial has expired. Upgrade to the monthly plan or contact management for Enterprise.</li>`;
+      }
+    } else if (documentsRes.status === "rejected") {
+      documentCountEl.textContent = "Total documents: error";
+      paidCountEl.textContent = "Paid documents: error";
+      pendingCountEl.textContent = "Pending documents: error";
+      documentsListEl.innerHTML = `<li>Documents error: ${documentsRes.reason.message}</li>`;
+    }
+  }
 
   document.addEventListener("DOMContentLoaded", function () {
     loadDashboard();
-  statusFilter.addEventListener("change", loadDashboard);
-  typeFilter.addEventListener("change", loadDashboard);
-  resetFiltersBtn.addEventListener("click", function () {
-  statusFilter.value = "ALL";
-  typeFilter.value = "ALL";
-  loadDashboard();
-});
-    clearTenantBtn.addEventListener("click", function () {
-  localStorage.removeItem("tenantId");
-  window.location.href = "onboarding.html";
-});
-    document.getElementById("submitDocBtn").addEventListener("click", async function () {
+
+    statusFilterEl.addEventListener("change", loadDashboard);
+    typeFilterEl.addEventListener("change", loadDashboard);
+
+    resetFiltersBtnEl.addEventListener("click", function () {
+      statusFilterEl.value = "ALL";
+      typeFilterEl.value = "ALL";
+      loadDashboard();
+    });
+
+    clearTenantBtnEl.addEventListener("click", function () {
+      localStorage.removeItem("tenantId");
+      window.location.href = "onboarding.html";
+    });
+
+    submitDocBtnEl.addEventListener("click", async function () {
       const tenantId = localStorage.getItem("tenantId");
 
-if (!tenantId) {
-  window.location.href = "onboarding.html";
-  return;
-}
+      if (!tenantId) {
+        window.location.href = "onboarding.html";
+        return;
+      }
 
       try {
-  const res = await submitDocument({
-    tenantId,
-    documentType: "invoice",
-    documentNumber: "INV-" + Date.now()
-  });
+        const res = await submitDocument({
+          tenantId,
+          documentType: "invoice",
+          documentNumber: "INV-" + Date.now()
+        });
 
-  if (!res.success) {
-    document.getElementById("submitResult").textContent =
-      res.message || "Request failed";
-    return;
-  }
+        if (!res.success) {
+          submitResultEl.textContent = res.message || "Request failed";
+          return;
+        }
 
-  document.getElementById("submitResult").textContent =
-    `${res.message} | Doc ID: ${res.data.id} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}`;
+        submitResultEl.textContent =
+          `${res.message} | Doc ID: ${res.data.id} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}${res.data.irn ? ` | IRN: ${res.data.irn}` : ""}`;
 
-  await loadDashboard();
-} catch (err) {
-  document.getElementById("submitResult").textContent =
-    "Error submitting document";
-}
+        await loadDashboard();
+      } catch (err) {
+        submitResultEl.textContent = `Error submitting document: ${err.message}`;
+      }
+    });
+
     window.markPaid = async function (documentId) {
-  const tenantId = localStorage.getItem("tenantId");
+      const tenantId = localStorage.getItem("tenantId");
 
-if (!tenantId) {
-  window.location.href = "onboarding.html";
-  return;
-}
+      if (!tenantId) {
+        window.location.href = "onboarding.html";
+        return;
+      }
 
-  try {
-    const res = await markDocumentPaid({
-      tenantId,
-      documentId
+      try {
+        const res = await markDocumentPaid({
+          tenantId,
+          documentId
+        });
+
+        if (!res.success) {
+          paymentResultEl.textContent =
+            res.message || "Failed to mark document as paid";
+          return;
+        }
+
+        paymentResultEl.textContent =
+          `${res.message} | Doc ID: ${res.data.id} | Payment: ${res.data.paymentStatus}`;
+
+        await loadDashboard();
+      } catch (err) {
+        paymentResultEl.textContent = `Error updating payment status: ${err.message}`;
+      }
+    };
+
+    submitCreditNoteBtnEl.addEventListener("click", async function () {
+      const tenantId = localStorage.getItem("tenantId");
+
+      if (!tenantId) {
+        window.location.href = "onboarding.html";
+        return;
+      }
+
+      try {
+        const res = await submitDocument({
+          tenantId,
+          documentType: "credit_note",
+          documentNumber: "CN-" + Date.now()
+        });
+
+        if (!res.success) {
+          submitResultEl.textContent = res.message || "Request failed";
+          return;
+        }
+
+        submitResultEl.textContent =
+          `${res.message} | Doc ID: ${res.data.id} | Type: ${res.data.documentType} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}${res.data.irn ? ` | IRN: ${res.data.irn}` : ""}`;
+
+        await loadDashboard();
+      } catch (err) {
+        submitResultEl.textContent = `Error submitting document: ${err.message}`;
+      }
     });
-
-    if (!res.success) {
-      document.getElementById("paymentResult").textContent =
-        res.message || "Failed to mark document as paid";
-      return;
-    }
-
-    document.getElementById("paymentResult").textContent =
-      `${res.message} | Doc ID: ${res.data.id} | Payment: ${res.data.paymentStatus}`;
-
-    await loadDashboard();
-  } catch (err) {
-    document.getElementById("paymentResult").textContent =
-      "Error updating payment status";
-  }
-};
-    });
-    document.getElementById("submitCreditNoteBtn").addEventListener("click", async function () {
-  const tenantId = localStorage.getItem("tenantId");
-
-if (!tenantId) {
-  window.location.href = "onboarding.html";
-  return;
-}
-
-  try {
-    const res = await submitDocument({
-      tenantId,
-      documentType: "credit_note",
-      documentNumber: "CN-" + Date.now()
-    });
-
-    if (!res.success) {
-      document.getElementById("submitResult").textContent =
-        res.message || "Request failed";
-      return;
-    }
-
-    document.getElementById("submitResult").textContent =
-      `${res.message} | Doc ID: ${res.data.id} | Type: ${res.data.documentType} | Status: ${res.data.transmissionStatus} | Payment: ${res.data.paymentStatus}`;
-
-    await loadDashboard();
-  } catch (err) {
-    document.getElementById("submitResult").textContent =
-      "Error submitting document";
-  }
-});
   });
 </script>
-</body>
-</html>
