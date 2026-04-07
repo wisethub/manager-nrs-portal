@@ -1,11 +1,10 @@
 <script src="assets/js/api.js"></script>
 <script>
   const existingTenantId = localStorage.getItem("tenantId");
-  if (existingTenantId) {
+  if (existingTenantId && existingTenantId !== "undefined" && existingTenantId !== "null") {
     window.location.href = "dashboard.html";
   }
 
-  const form = document.getElementById("onboardingForm");
   const result = document.getElementById("result");
   const nrsTestResult = document.getElementById("nrsTestResult");
   const saveBtn = document.getElementById("saveBtn");
@@ -13,7 +12,6 @@
   const dashboardLink = document.querySelector('a[href="dashboard.html"]');
 
   let nrsTestPassed = false;
-  let savedTenantId = localStorage.getItem("tenantId") || "";
 
   function getPayload() {
     return {
@@ -33,7 +31,20 @@
     };
   }
 
+  function extractTenantId(res) {
+    return (
+      res?.data?.tenantId ||
+      res?.data?.id ||
+      res?.tenantId ||
+      res?.id ||
+      res?.data?.tenant_id ||
+      res?.tenant_id ||
+      ""
+    );
+  }
+
   testNrsBtn.onclick = async function () {
+    result.textContent = "";
     const payload = getPayload();
 
     if (
@@ -52,20 +63,7 @@
     }
 
     try {
-      const res = await testNrsConnection({
-        tin: payload.tin,
-        registered_email: payload.registered_email,
-        base_url: payload.base_url,
-        report_base_url: payload.report_base_url,
-        entity_id: payload.entity_id,
-        business_id: payload.business_id,
-        api_key: payload.api_key,
-        client_secret: payload.client_secret,
-        irn_template: payload.irn_template,
-        cryptographic_key: payload.cryptographic_key,
-        public_key: payload.public_key,
-        service_id: payload.service_id
-      });
+      const res = await testNrsConnection(payload);
 
       if (!res.success) {
         nrsTestPassed = false;
@@ -83,6 +81,8 @@
   };
 
   saveBtn.onclick = async function () {
+    result.textContent = "";
+
     if (!nrsTestPassed) {
       result.textContent = "Please test NRS connection successfully before saving.";
       return;
@@ -98,43 +98,38 @@
         return;
       }
 
-      const tenantId =
-        res?.data?.tenantId ||
-        res?.data?.id ||
-        res?.tenantId ||
-        res?.id ||
-        "";
+      const tenantId = extractTenantId(res);
 
       if (!tenantId) {
-        result.textContent = "Tenant saved, but tenant ID was missing in the response.";
+        result.textContent = "Saved response did not include tenant ID.";
         return;
       }
 
-      savedTenantId = tenantId;
       localStorage.setItem("tenantId", tenantId);
 
       result.textContent =
-        `Onboarding saved successfully. Tenant ID: ${tenantId} | Plan: ${res.data.plan || "trial"} | Free submissions: ${res.data.trialFreeSubmissions ?? 5}`;
+        `Onboarding saved successfully. Tenant ID: ${tenantId} | Plan: ${res?.data?.plan || "trial"} | Free submissions: ${res?.data?.trialFreeSubmissions ?? 5}`;
 
-      setTimeout(() => {
+      setTimeout(function () {
         window.location.href = "dashboard.html";
-      }, 800);
+      }, 1000);
     } catch (err) {
       result.textContent = "Error saving onboarding data";
     }
   };
 
   if (dashboardLink) {
-    dashboardLink.addEventListener("click", function (e) {
-      const tenantId = savedTenantId || localStorage.getItem("tenantId");
+    dashboardLink.onclick = function (e) {
+      const tenantId = localStorage.getItem("tenantId");
 
-      if (!tenantId) {
+      if (!tenantId || tenantId === "undefined" || tenantId === "null") {
         e.preventDefault();
         result.textContent = "Please save onboarding successfully before going to dashboard.";
-        return;
+        return false;
       }
 
-      localStorage.setItem("tenantId", tenantId);
-    });
+      window.location.href = "dashboard.html";
+      return false;
+    };
   }
 </script>
