@@ -1,7 +1,6 @@
 const API_BASE_URL = "https://manager-nrs-api.onrender.com";
 
-async function apiGet(path) {
-  const res = await fetch(`${API_BASE_URL}${path}`);
+async function readJsonResponse(res, path) {
   const text = await res.text();
 
   try {
@@ -9,6 +8,11 @@ async function apiGet(path) {
   } catch (err) {
     throw new Error(`Non-JSON response from ${path}: ${text.slice(0, 120)}`);
   }
+}
+
+async function apiGet(path) {
+  const res = await fetch(`${API_BASE_URL}${path}`);
+  return readJsonResponse(res, path);
 }
 
 async function apiPost(path, payload) {
@@ -20,43 +24,37 @@ async function apiPost(path, payload) {
     body: JSON.stringify(payload)
   });
 
-  const text = await res.text();
-
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    throw new Error(`Non-JSON response from ${path}: ${text.slice(0, 120)}`);
-  }
+  return readJsonResponse(res, path);
 }
 
 async function onboardTenant(payload) {
-  return apiPost("/setup/onboard", payload);
+  return apiPost("/api/setup/onboard", payload);
 }
 
 async function testNrsConnection(payload) {
-  return apiPost("/setup/test-nrs", payload);
+  return apiPost("/api/setup/test-nrs", payload);
 }
 
 async function getPlan(tenantId) {
-  return apiGet(`/billing/plan/${tenantId}`);
+  return apiGet(`/api/billing/plan/${tenantId}`);
 }
 
 async function getUsage(tenantId) {
-  return apiGet(`/billing/usage/${tenantId}`);
+  return apiGet(`/api/billing/usage/${tenantId}`);
 }
 
 async function getTenant(tenantId) {
-  return apiGet(`/tenants/${tenantId}`);
+  return apiGet(`/api/tenants/${tenantId}`);
 }
 
 async function getDocuments(tenantId) {
-  return apiGet(`/documents/${tenantId}`);
+  return apiGet(`/api/documents/${tenantId}`);
 }
 
 async function submitDocument(payload) {
-  return apiPost("/documents/submit", payload);
+  return apiPost("/api/documents/submit", payload);
 }
 
 async function markDocumentPaid(payload) {
-  return apiPost("/payments/mark-paid", payload);
+  return apiPost("/api/payments/mark-paid", payload);
 }
