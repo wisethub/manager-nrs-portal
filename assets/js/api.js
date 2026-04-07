@@ -48,7 +48,8 @@ async function getTenant(tenantId) {
 }
 
 async function getDocuments(tenantId) {
-  return apiGet(`/api/setup/documents/${tenantId}`);
+  return apiGet(`/api/documents/list/${tenantId}`);
+}
 }
 
 async function submitDocument(payload) {
