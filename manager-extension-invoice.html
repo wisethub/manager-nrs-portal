@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NRS Invoice Submit</title>
+</head>
+<body>
+  <p id="status">Preparing invoice submission...</p>
+
+  <script>
+    async function submitToBackend() {
+      const statusEl = document.getElementById("status");
+
+      try {
+        const params = new URLSearchParams(window.location.search);
+
+        const payload = {
+          tenantId: "tenant_1775595272183",
+          managerDocumentId: params.get("DocumentNumber") || params.get("documentNumber") || "",
+          documentNumber: params.get("DocumentNumber") || params.get("documentNumber") || ("INV-" + Date.now()),
+          issueDate: params.get("IssueDate") || new Date().toISOString().slice(0, 10),
+          issueTime: "00:00:00",
+          customer: {
+            name: params.get("CustomerName") || params.get("customerName") || "Customer",
+            tin: params.get("CustomerTin") || params.get("customerTin") || "",
+            email: params.get("CustomerEmail") || params.get("customerEmail") || "",
+            phone: params.get("CustomerPhone") || params.get("customerPhone") || "",
+            businessDescription: "",
+            address: {
+              street: "",
+              city: "",
+              postalCode: "",
+              state: "",
+              country: "NG"
+            }
+          },
+          lines: [
+            {
+              name: "Manager Invoice Item",
+              description: "Manager Invoice Item",
+              quantity: 1,
+              unitPrice: 1000,
+              lineExtensionAmount: 1000,
+              taxPercent: 7.5,
+              taxCategoryId: "STANDARD_VAT",
+              hsnCode: ""
+            }
+          ]
+        };
+
+        const res = await fetch("https://manager-nrs-api.onrender.com/api/manager/invoice/submit?secret=nrs-manager-2026-x7q9m2v4k8p1z6r3t5y", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+          statusEl.textContent =
+            "Invoice submission failed: " +
+            (data.message || "Unknown error") +
+            (data.error ? " | " + data.error : "");
+          return;
+        }
+
+        statusEl.textContent =
+          "Invoice submitted successfully" +
+          " | Number: " + data.data.documentNumber +
+          " | Status: " + data.data.transmissionStatus +
+          " | IRN: " + (data.data.irn || "");
+      } catch (error) {
+        document.getElementById("status").textContent =
+          "Invoice submission failed: " + error.message;
+      }
+    }
+
+    submitToBackend();
+  </script>
+</body>
+</html>
