@@ -127,15 +127,18 @@
 
         var irnText = doc.irn ? " | IRN: " + doc.irn : "";
 
-        return "<li>" +
-          "ID: " + doc.id +
-          " | Number: " + doc.documentNumber +
-          " | Type: " + doc.documentType +
-          " | Transmission: " + doc.transmissionStatus +
-          " | Payment: " + doc.paymentStatus +
-          irnText +
-          " " + markPaidButton +
-          "</li>";
+        var reportText = doc.reportStatus ? " | Report: " + doc.reportStatus : "";
+
+return "<li>" +
+  "ID: " + doc.id +
+  " | Number: " + doc.documentNumber +
+  " | Type: " + doc.documentType +
+  " | Transmission: " + doc.transmissionStatus +
+  " | Payment: " + doc.paymentStatus +
+  irnText +
+  reportText +
+  " " + markPaidButton +
+  "</li>";
       }).join("");
     }
 
