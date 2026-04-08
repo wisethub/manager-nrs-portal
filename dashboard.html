@@ -157,8 +157,6 @@
       el("paidCount").textContent = "Paid documents: loading...";
       el("pendingCount").textContent = "Pending documents: loading...";
       el("documentsList").innerHTML = "<li>Loading documents...</li>";
-      el("submitResult").textContent = "";
-      el("paymentResult").textContent = "";
 
       await wakeBackend();
 
@@ -314,14 +312,18 @@
           });
 
           if (!res.success) {
-            el("paymentResult").textContent = res.message || "Failed to mark document as paid";
+            el("paymentResult").textContent =
+              (res.message || "Failed to mark document as paid") +
+              (res.error ? " | Error: " + res.error : "") +
+              (res.data ? " | NRS: " + JSON.stringify(res.data) : "");
             return;
           }
 
           el("paymentResult").textContent =
             res.message +
             " | Doc ID: " + res.data.id +
-            " | Payment: " + res.data.paymentStatus;
+            " | Payment: " + res.data.paymentStatus +
+            (res.data.reportStatus ? " | Report: " + res.data.reportStatus : "");
 
           await loadDashboard();
         } catch (err) {
