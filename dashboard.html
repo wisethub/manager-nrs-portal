@@ -20,8 +20,9 @@
 
   <h2>Document Log</h2>
   <p id="documentCount">Total documents: loading...</p>
-  <p id="paidCount">Paid documents: loading...</p>
-  <p id="pendingCount">Pending documents: loading...</p>
+<p id="paidCount">Paid documents: loading...</p>
+<p id="pendingCount">Pending documents: loading...</p>
+<p id="statusSummary">Signed: loading... | Paid: loading... | Reported: loading...</p>
 
   <p>
     <label for="statusFilter">Filter by payment status:</label>
@@ -89,16 +90,28 @@
       var typeFilterEl = el("typeFilter");
 
       var paidTotal = documents.filter(function (doc) {
-        return doc.paymentStatus === "PAID";
-      }).length;
+  return doc.paymentStatus === "PAID";
+}).length;
 
-      var pendingTotal = documents.filter(function (doc) {
-        return doc.paymentStatus !== "PAID";
-      }).length;
+var pendingTotal = documents.filter(function (doc) {
+  return doc.paymentStatus !== "PAID";
+}).length;
 
-      documentCountEl.textContent = "Total documents: " + documents.length;
-      paidCountEl.textContent = "Paid documents: " + paidTotal;
-      pendingCountEl.textContent = "Pending documents: " + pendingTotal;
+var signedTotal = documents.filter(function (doc) {
+  return doc.transmissionStatus === "signed";
+}).length;
+
+var reportedTotal = documents.filter(function (doc) {
+  return doc.reportStatus === "REPORTED";
+}).length;
+
+documentCountEl.textContent = "Total documents: " + documents.length;
+paidCountEl.textContent = "Paid documents: " + paidTotal;
+pendingCountEl.textContent = "Pending documents: " + pendingTotal;
+el("statusSummary").textContent =
+  "Signed: " + signedTotal +
+  " | Paid: " + paidTotal +
+  " | Reported: " + reportedTotal;
 
       var selectedStatus = statusFilterEl.value;
       var selectedType = typeFilterEl.value;
@@ -157,9 +170,10 @@ return "<li>" +
       el("tenantTin").textContent = "TIN: loading...";
       el("tenantEmail").textContent = "Email: loading...";
       el("documentCount").textContent = "Total documents: loading...";
-      el("paidCount").textContent = "Paid documents: loading...";
-      el("pendingCount").textContent = "Pending documents: loading...";
-      el("documentsList").innerHTML = "<li>Loading documents...</li>";
+el("paidCount").textContent = "Paid documents: loading...";
+el("pendingCount").textContent = "Pending documents: loading...";
+el("statusSummary").textContent = "Signed: loading... | Paid: loading... | Reported: loading...";
+el("documentsList").innerHTML = "<li>Loading documents...</li>";
 
       await wakeBackend();
 
@@ -237,8 +251,9 @@ return "<li>" +
           renderDocuments(docs, remaining);
         } else {
           el("documentCount").textContent = "Total documents: 0";
-          el("paidCount").textContent = "Paid documents: 0";
-          el("pendingCount").textContent = "Pending documents: 0";
+el("paidCount").textContent = "Paid documents: 0";
+el("pendingCount").textContent = "Pending documents: 0";
+el("statusSummary").textContent = "Signed: 0 | Paid: 0 | Reported: 0";
 
           el("documentsList").innerHTML = remaining > 0
             ? "<li>No documents submitted yet. Trial is active with " + remaining + " free submission(s) remaining. Submit a test invoice or credit note to begin.</li>"
@@ -246,9 +261,10 @@ return "<li>" +
         }
       } else if (documentsRes.status === "rejected") {
         el("documentCount").textContent = "Total documents: error";
-        el("paidCount").textContent = "Paid documents: error";
-        el("pendingCount").textContent = "Pending documents: error";
-        el("documentsList").innerHTML = "<li>Documents error: " + documentsRes.reason.message + "</li>";
+el("paidCount").textContent = "Paid documents: error";
+el("pendingCount").textContent = "Pending documents: error";
+el("statusSummary").textContent = "Signed: error | Paid: error | Reported: error";
+el("documentsList").innerHTML = "<li>Documents error: " + documentsRes.reason.message + "</li>";
       }
     }
 
