@@ -288,18 +288,18 @@ return "<li>" +
           }
 
           el("submitResult").textContent =
-            res.message +
-            " | Doc ID: " + res.data.id +
-            " | Status: " + res.data.transmissionStatus +
-            " | Payment: " + res.data.paymentStatus +
-            (res.data.irn ? " | IRN: " + res.data.irn : "");
-
+  "Invoice submitted successfully" +
+  " | Number: " + res.data.documentNumber +
+  " | Transmission: " + res.data.transmissionStatus +
+  " | Payment: " + res.data.paymentStatus +
+  (res.data.irn ? " | IRN: " + res.data.irn : "");
           await loadDashboard();
         } catch (err) {
           el("submitResult").textContent = "Error submitting document: " + err.message;
         }
       });
-
+el("submitResult").textContent = "";
+el("paymentResult").textContent = "";
       window.markPaid = async function (documentId) {
         var tenantId = localStorage.getItem("tenantId");
 
@@ -316,24 +316,26 @@ return "<li>" +
 
           if (!res.success) {
             el("paymentResult").textContent =
-              (res.message || "Failed to mark document as paid") +
-              (res.error ? " | Error: " + res.error : "") +
-              (res.data ? " | NRS: " + JSON.stringify(res.data) : "");
+  "Payment update failed" +
+  (res.message ? " | " + res.message : "") +
+  (res.error ? " | Error: " + res.error : "") +
+  (res.data ? " | Details: " + JSON.stringify(res.data) : "");
             return;
           }
 
-          el("paymentResult").textContent =
-            res.message +
-            " | Doc ID: " + res.data.id +
-            " | Payment: " + res.data.paymentStatus +
-            (res.data.reportStatus ? " | Report: " + res.data.reportStatus : "");
-
+         el("paymentResult").textContent =
+  "Payment updated successfully" +
+  " | Number: " + res.data.documentNumber +
+  " | Payment: " + res.data.paymentStatus +
+  (res.data.reportStatus ? " | Report: " + res.data.reportStatus : "") +
+  (res.data.irn ? " | IRN: " + res.data.irn : "");
           await loadDashboard();
         } catch (err) {
           el("paymentResult").textContent = "Error updating payment status: " + err.message;
         }
       };
-
+el("paymentResult").textContent = "";
+el("submitResult").textContent = "";
       el("submitCreditNoteBtn").addEventListener("click", async function () {
         var tenantId = localStorage.getItem("tenantId");
 
@@ -355,19 +357,19 @@ return "<li>" +
           }
 
           el("submitResult").textContent =
-            res.message +
-            " | Doc ID: " + res.data.id +
-            " | Type: " + res.data.documentType +
-            " | Status: " + res.data.transmissionStatus +
-            " | Payment: " + res.data.paymentStatus +
-            (res.data.irn ? " | IRN: " + res.data.irn : "");
+  "Credit note submitted successfully" +
+  " | Number: " + res.data.documentNumber +
+  " | Transmission: " + res.data.transmissionStatus +
+  " | Payment: " + res.data.paymentStatus +
+  (res.data.irn ? " | IRN: " + res.data.irn : "");
 
           await loadDashboard();
         } catch (err) {
           el("submitResult").textContent = "Error submitting document: " + err.message;
         }
       });
-
+el("submitResult").textContent = "";
+el("paymentResult").textContent = "";
       loadDashboard();
     });
   </script>
